@@ -1,5 +1,6 @@
-import functools
 import collections
+import functools
+
 
 try:
     from threading import RLock

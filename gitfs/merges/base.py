@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class Merger(object):
+class Merger:
     def __init__(self, repository, **kwargs):
         self.repository = repository
         for arg in kwargs:

@@ -13,19 +13,19 @@
 # limitations under the License.
 
 
-import sys
 import argparse
 import resource
+import sys
 
 from fuse import FUSE
 from pygit2 import Keypair, UserPass
 from pygit2.remote import RemoteCallbacks
 
 from gitfs import __version__
-from gitfs.utils import Args
-from gitfs.routes import prepare_routes
 from gitfs.router import Router
-from gitfs.worker import CommitQueue, SyncWorker, FetchWorker
+from gitfs.routes import prepare_routes
+from gitfs.utils import Args
+from gitfs.worker import CommitQueue, FetchWorker, SyncWorker
 
 
 def parse_args(parser):

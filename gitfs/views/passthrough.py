@@ -15,11 +15,12 @@
 
 import fcntl
 import os
-
-from fuse import FuseOSError
 from errno import EACCES
 
+from fuse import FuseOSError
+
 from .view import View
+
 
 STATS = (
     "st_atime",

@@ -1,0 +1,44 @@
+[tool.ruff]
+# Equivalent to black's target-version py311
+target-version = "py311"
+
+# Line length (black's default is 88)
+line-length = 88
+
+[tool.ruff.format]
+# Use double quotes for strings (black's default)
+quote-style = "double"
+
+# Use spaces for indentation (black's default)
+indent-style = "space"
+
+# Respect magic trailing commas (black's default)
+skip-magic-trailing-comma = false
+
+# Auto-detect line endings (black's default)
+line-ending = "auto"
+
+[tool.ruff.lint]
+# Enable pycodestyle (E, W), pyflakes (F), and other useful rules
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+
+# Ignore some rules that might be too strict for existing codebase
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+    "B008",  # Do not perform function calls in argument defaults
+    "C901",  # Too complex
+]
+
+[tool.ruff.lint.isort]
+# Configure import sorting to be compatible with black
+force-single-line = false
+force-sort-within-sections = false
+lines-after-imports = 2

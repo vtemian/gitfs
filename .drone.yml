@@ -2,11 +2,11 @@ pipeline:
   verify-lint:
     image: quay.io/presslabs/gitfs-test:3.11
     commands:
-      - pip3 install black
+      - pip3 install ruff
       - make verify-lint
 
   test:
-    image: quay.io/presslabs/gitfs-test:${PYTHON_VERSION}
+    image: quay.io/presslabs/gitfs-test:3.11
     privileged: true
     environment:
       - PIP_DOWNLOAD_CACHE=/tmp/pip_download_cache
@@ -20,19 +20,3 @@ pipeline:
       - make test
     volumes:
       - /var/cache/apt/:/var/cache/apt/
-
-  trigger-docs-build:
-    image: plugins/downstream
-    server: https://drone.presslabs.net
-    fork: true
-    secrets: [DRONE_TOKEN]
-    repositories:
-      - presslabs/docs
-    when:
-      branch: master
-      event: push
-
-matrix:
-  include:
-    - PYTHON_VERSION: 3.11
-    - PYTHON_VERSION: 3.12

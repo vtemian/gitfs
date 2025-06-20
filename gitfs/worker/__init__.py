@@ -13,6 +13,6 @@
 # limitations under the License.
 
 
-from .sync import SyncWorker
 from .commit_queue import CommitQueue
 from .fetch import FetchWorker
+from .sync import SyncWorker

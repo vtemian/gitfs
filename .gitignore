@@ -21,3 +21,5 @@ build/*
 *.egg
 *.so
 *.dylib
+
+venv/

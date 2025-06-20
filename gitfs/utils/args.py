@@ -14,23 +14,22 @@
 
 
 import getpass
+import grp
+import logging
 import os
 import socket
-import tempfile
-import grp
 import sys
-
-import logging
-from logging import Formatter, StreamHandler
-from logging.handlers import TimedRotatingFileHandler, SysLogHandler
+import tempfile
 from collections import OrderedDict
+from logging import Formatter, StreamHandler
+from logging.handlers import SysLogHandler, TimedRotatingFileHandler
 from urllib.parse import urlparse
 
-from gitfs.log import log
 from gitfs.cache import lru_cache
+from gitfs.log import log
 
 
-class Args(object):
+class Args:
     def __init__(self, parser):
         self.DEFAULTS = OrderedDict(
             [
@@ -94,7 +93,7 @@ class Args(object):
                 handler = TimedRotatingFileHandler(args.log, when="midnight")
             handler.setFormatter(
                 Formatter(
-                    fmt="%(asctime)s %(threadName)s: " "%(message)s",
+                    fmt="%(asctime)s %(threadName)s: %(message)s",
                     datefmt="%B-%d-%Y %H:%M:%S",
                 )
             )
@@ -104,8 +103,8 @@ class Args(object):
             else:
                 handler = SysLogHandler(address="/dev/log")
             logger_fmt = (
-                "GitFS on {mount_point} [%(process)d]: %(threadName)s: "
-                "%(message)s".format(mount_point=args.mount_point)
+                f"GitFS on {args.mount_point} [%(process)d]: %(threadName)s: "
+                "%(message)s"
             )
             handler.setFormatter(Formatter(fmt=logger_fmt))
 
@@ -114,17 +113,16 @@ class Args(object):
             from sentry_sdk.integrations.logging import LoggingIntegration
 
             sentry_logging = LoggingIntegration(
-                level=logging.INFO,
-                event_level=logging.ERROR
+                level=logging.INFO, event_level=logging.ERROR
             )
-            
+
             sentry_sdk.init(
                 dsn=args.sentry_dsn,
                 integrations=[sentry_logging],
                 traces_sample_rate=0.0,
                 profiles_sample_rate=0.0,
             )
-            
+
             sentry_sdk.set_tag("owner", args.user)
             sentry_sdk.set_tag("remote", args.remote_url)
             sentry_sdk.set_tag("mountpoint", args.mount_point)
@@ -183,7 +181,7 @@ class Args(object):
         return args.user
 
     def get_commiter_email(self, args):
-        return "{}@{}".format(args.user, socket.gethostname())
+        return f"{args.user}@{socket.gethostname()}"
 
     def get_repo_path(self, args):
         return tempfile.mkdtemp(dir="/var/lib/gitfs")

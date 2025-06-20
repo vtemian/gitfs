@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class CommitsList(object):
+class CommitsList:
     def __init__(self, commits=None, hashes=None):
         self.commits = commits or []
         self.hashes = hashes or []

@@ -13,24 +13,23 @@
 # limitations under the License.
 import random
 import time
-
-import pygit2
 from queue import Empty
 
-from gitfs.worker.peasant import Peasant
-from gitfs.merges import AcceptMine
+import pygit2
 
 from gitfs.events import (
     fetch,
-    syncing,
-    sync_done,
-    writers,
-    shutting_down,
-    remote_operation,
-    push_successful,
     idle,
+    push_successful,
+    remote_operation,
+    shutting_down,
+    sync_done,
+    syncing,
+    writers,
 )
 from gitfs.log import log
+from gitfs.merges import AcceptMine
+from gitfs.worker.peasant import Peasant
 
 
 class SyncWorker(Peasant):
@@ -189,11 +188,11 @@ class SyncWorker(Peasant):
                 number_of_removal += len(removal_set)
                 number_of_additions += len(addition_set)
                 updates = updates | removal_set | addition_set
-            message = "Update {} items. ".format(len(updates))
+            message = f"Update {len(updates)} items. "
             if number_of_additions:
-                message += "Added {} items. ".format(number_of_additions)
+                message += f"Added {number_of_additions} items. "
             if number_of_removal:
-                message += "Removed {} items. ".format(number_of_removal)
+                message += f"Removed {number_of_removal} items. "
             message = message.strip()
 
         old_head = self.repository.head.target

@@ -17,11 +17,10 @@ import errno
 import inspect
 from functools import wraps
 
-
 from fuse import FuseOSError
 
 
-class not_in(object):
+class not_in:
     def __init__(self, look_at, check=None):
         self.look_at = look_at
         self.check = check

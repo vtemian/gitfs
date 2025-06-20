@@ -17,12 +17,12 @@ from queue import Queue
 from gitfs.log import log
 
 
-class BaseQueue(object):
+class BaseQueue:
     def __init__(self):
         self.queue = Queue()
 
     def commit(self, *args, **kwargs):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def get(self, *args, **kwargs):
         return self.queue.get(*args, **kwargs)

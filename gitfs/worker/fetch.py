@@ -13,9 +13,9 @@
 # limitations under the License.
 
 
-from gitfs.worker.peasant import Peasant
-from gitfs.events import fetch, fetch_successful, shutting_down, idle, remote_operation
+from gitfs.events import fetch, fetch_successful, idle, remote_operation, shutting_down
 from gitfs.log import log
+from gitfs.worker.peasant import Peasant
 
 
 class FetchWorker(Peasant):
@@ -27,7 +27,7 @@ class FetchWorker(Peasant):
             if idle.is_set():
                 timeout = self.idle_timeout
 
-            log.debug("Wait for {}".format(timeout))
+            log.debug(f"Wait for {timeout}")
             fetch.wait(timeout)
 
             if shutting_down.is_set():

@@ -15,18 +15,19 @@
 
 import os
 from errno import ENOENT
+
+from fuse import FuseOSError
 from pygit2 import (
-    GIT_FILEMODE_TREE,
     GIT_FILEMODE_BLOB,
     GIT_FILEMODE_BLOB_EXECUTABLE,
     GIT_FILEMODE_LINK,
+    GIT_FILEMODE_TREE,
 )
-from fuse import FuseOSError
 
 from gitfs.utils import split_path_into_components
-from gitfs.cache import lru_cache
 
 from .read_only import ReadOnlyView
+
 
 VALID_FILE_MODES = [
     GIT_FILEMODE_BLOB,

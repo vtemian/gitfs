@@ -13,13 +13,12 @@
 # limitations under the License.
 
 
-import re
-import os
 import fnmatch
+import os
+import re
 
 
-
-class CachedIgnore(object):
+class CachedIgnore:
     def __init__(self, ignore=False, submodules=False, exclude=False, hard_ignore=None):
         self.items = []
 
@@ -42,12 +41,12 @@ class CachedIgnore(object):
         if self.submodules and os.path.exists(self.submodules):
             with open(self.submodules) as submodules:
                 content = submodules.read()
-                pattern = re.compile("path(\s*)=(\s*)(\w*)")
+                pattern = re.compile(r"path(\s*)=(\s*)(\w*)")
                 results = re.findall(pattern, content)
                 for result in results:
-                    self.items.append("/{}/*".format(result[2]))
-                    self.items.append("/{}".format(result[2]))
-                    self.items.append("{}".format(result[2]))
+                    self.items.append(f"/{result[2]}/*")
+                    self.items.append(f"/{result[2]}")
+                    self.items.append(f"{result[2]}")
 
         self.cache = {}
         self.items += self.hard_ignore

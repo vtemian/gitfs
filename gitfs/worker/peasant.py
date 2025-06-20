@@ -15,7 +15,6 @@
 
 from threading import Thread
 
-
 from gitfs.log import log
 
 

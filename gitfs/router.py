@@ -13,26 +13,24 @@
 # limitations under the License.
 
 
-import re
-import os
-import time
-import shutil
 import inspect
-
-from pwd import getpwnam
-from grp import getgrnam
-
+import os
+import re
+import shutil
+import time
 from errno import ENOSYS
+from grp import getgrnam
+from pwd import getpwnam
 
 from fuse import FUSE, FuseOSError
 
-from gitfs.repository import Repository
 from gitfs.cache import CachedIgnore, lru_cache
-from gitfs.events import shutting_down, fetch, idle
+from gitfs.events import fetch, idle, shutting_down
 from gitfs.log import log
+from gitfs.repository import Repository
 
 
-class Router(object):
+class Router:
     def __init__(
         self,
         remote_url,
@@ -44,7 +42,7 @@ class Router(object):
         branch=None,
         user="root",
         group="root",
-        **kwargs
+        **kwargs,
     ):
         """
         Clone repo from a remote into repo_path/<repo_name> and checkout to
@@ -66,7 +64,7 @@ class Router(object):
 
         self.routes = []
 
-        log.info("Cloning into {}".format(self.repo_path))
+        log.info(f"Cloning into {self.repo_path}")
 
         self.repo = Repository.clone(
             self.remote_url, self.repo_path, self.branch, credentials
@@ -208,7 +206,7 @@ class Router(object):
 
             return view, relative_path
 
-        raise ValueError("Found no view for '{}'".format(path))
+        raise ValueError(f"Found no view for '{path}'")
 
     def __getattr__(self, attr_name):
         """

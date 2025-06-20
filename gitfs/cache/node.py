@@ -13,5 +13,5 @@
 # limitations under the License.
 
 
-class Node(object):
+class Node:
     __slots__ = "prev", "next", "data"

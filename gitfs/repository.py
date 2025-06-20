@@ -16,25 +16,24 @@
 import os
 from collections import namedtuple
 from shutil import rmtree
-from stat import S_IFDIR, S_IFREG, S_IFLNK
+from stat import S_IFDIR, S_IFLNK, S_IFREG
 
 from pygit2 import (
-    clone_repository,
-    Signature,
-    GIT_SORT_TOPOLOGICAL,
-    GIT_FILEMODE_TREE,
-    GIT_STATUS_CURRENT,
-    GIT_FILEMODE_LINK,
-    GIT_FILEMODE_BLOB,
     GIT_BRANCH_REMOTE,
-    GIT_BRANCH_LOCAL,
+    GIT_FILEMODE_BLOB,
     GIT_FILEMODE_BLOB_EXECUTABLE,
+    GIT_FILEMODE_LINK,
+    GIT_FILEMODE_TREE,
+    GIT_SORT_TOPOLOGICAL,
+    GIT_STATUS_CURRENT,
+    Signature,
+    clone_repository,
 )
 
 from gitfs.cache import CommitCache
 from gitfs.log import log
-from gitfs.utils.path import split_path_into_components
 from gitfs.utils.commits import CommitsList
+from gitfs.utils.path import split_path_into_components
 
 
 DivergeCommits = namedtuple(
@@ -42,7 +41,7 @@ DivergeCommits = namedtuple(
 )
 
 
-class Repository(object):
+class Repository:
     def __init__(self, repository, commits=None):
         self._repo = repository
         self.commits = commits or CommitCache(self)
@@ -71,7 +70,7 @@ class Repository(object):
         return ahead
 
     def diverge(self, upstream, branch):
-        reference = "{}/{}".format(upstream, branch)
+        reference = f"{upstream}/{branch}"
         remote_branch = self._repo.branches.remote.get(reference)
         local_branch = self._repo.branches.local.get(branch)
 
@@ -196,7 +195,7 @@ class Repository(object):
             repo = clone_repository(
                 remote_url, path, checkout_branch=branch, callbacks=credentials
             )
-        except Exception as e:
+        except Exception:
             log.error("Error on cloning the repository: ", exc_info=True)
 
         repo.checkout_head()
@@ -443,7 +442,7 @@ class Repository(object):
         return os.path.join(self._repo.workdir, partial)
 
     def find_diverge_commits(self, first_branch, second_branch):
-        """
+        r"""
         Take two branches and find diverge commits.
 
              2--3--4--5

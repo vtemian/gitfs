@@ -13,15 +13,14 @@
 # limitations under the License.
 
 
-import time
 import os
-from stat import S_IFDIR
+import time
 from errno import ENOENT
+from stat import S_IFDIR
 
 from fuse import FuseOSError
 
 from gitfs.log import log
-from gitfs.cache import lru_cache
 
 from .read_only import ReadOnlyView
 

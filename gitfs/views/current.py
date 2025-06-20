@@ -13,19 +13,18 @@
 # limitations under the License.
 
 
-import re
-import os
 import errno
+import os
+import re
 
 from fuse import FuseOSError
 
+from gitfs.events import writers
+from gitfs.log import log
 from gitfs.utils.decorators.not_in import not_in
 from gitfs.utils.decorators.write_operation import write_operation
-from gitfs.log import log
 
-from gitfs.events import writers
-
-from .passthrough import PassthroughView, STATS
+from .passthrough import STATS, PassthroughView
 
 
 class CurrentView(PassthroughView):
@@ -41,7 +40,7 @@ class CurrentView(PassthroughView):
         new = re.sub(self.regex, "", new)
         result = super(CurrentView, self).rename(old, new)
 
-        message = "Rename {} to {}".format(old, new)
+        message = f"Rename {old} to {new}"
         self._stage(**{"remove": os.path.split(old)[1], "add": new, "message": message})
 
         log.debug("CurrentView: Renamed %s to %s", old, new)
@@ -52,7 +51,7 @@ class CurrentView(PassthroughView):
     def symlink(self, name, target):
         result = os.symlink(target, self.repo._full_path(name))
 
-        message = "Create symlink to {} for {}".format(target, name)
+        message = f"Create symlink to {target} for {name}"
         self._stage(add=name, message=message)
 
         log.debug("CurrentView: Created symlink to %s from %s", name, target)
@@ -66,7 +65,7 @@ class CurrentView(PassthroughView):
 
         result = super(CurrentView, self).link(target, name)
 
-        message = "Create link to {} for {}".format(target, name)
+        message = f"Create link to {target} for {name}"
         self._stage(add=name, message=message)
 
         log.debug("CurrentView: Created link to %s from %s", name, target)
@@ -90,16 +89,16 @@ class CurrentView(PassthroughView):
     @not_in("ignore", check=["path"])
     def write(self, path, buf, offset, fh):
         """
-            We don't like big big files, so we need to be really carefull
-            with them. First we check for offset, then for size. If any of this
-            is off limit, raise EFBIG error and delete the file.
+        We don't like big big files, so we need to be really carefull
+        with them. First we check for offset, then for size. If any of this
+        is off limit, raise EFBIG error and delete the file.
         """
 
         if offset + len(buf) > self.max_size:
             raise FuseOSError(errno.EFBIG)
 
         result = super(CurrentView, self).write(path, buf, offset, fh)
-        self.dirty[fh] = {"message": "Update {}".format(path), "stage": True}
+        self.dirty[fh] = {"message": f"Update {path}", "stage": True}
 
         log.debug("CurrentView: Wrote %s to %s", len(buf), path)
         return result
@@ -109,7 +108,7 @@ class CurrentView(PassthroughView):
     def mkdir(self, path, mode):
         result = super(CurrentView, self).mkdir(path, mode)
 
-        keep_path = "{}/.keep".format(path)
+        keep_path = f"{path}/.keep"
         full_path = self.repo._full_path(keep_path)
         if not os.path.exists(keep_path):
             global writers
@@ -120,7 +119,7 @@ class CurrentView(PassthroughView):
             super(CurrentView, self).chmod(keep_path, 0o644)
 
             self.dirty[fh] = {
-                "message": "Create the {} directory".format(path),
+                "message": f"Create the {path} directory",
                 "stage": True,
             }
 
@@ -134,7 +133,7 @@ class CurrentView(PassthroughView):
         fh = self.open_for_write(path, os.O_WRONLY | os.O_CREAT)
         super(CurrentView, self).chmod(path, mode)
 
-        self.dirty[fh] = {"message": "Created {}".format(path), "stage": True}
+        self.dirty[fh] = {"message": f"Created {path}", "stage": True}
 
         log.debug("CurrentView: Created %s", path)
         return fh
@@ -154,7 +153,7 @@ class CurrentView(PassthroughView):
         if os.path.isdir(self.repo._full_path(path)):
             return result
 
-        message = "Chmod to {} on {}".format(str_mode, path)
+        message = f"Chmod to {str_mode} on {path}"
         self._stage(add=path, message=message)
 
         log.debug("CurrentView: Change %s mode to %s", path, ("0%o" % mode)[-4:])
@@ -169,7 +168,7 @@ class CurrentView(PassthroughView):
 
         result = super(CurrentView, self).fsync(path, fdatasync, fh)
 
-        message = "Fsync {}".format(path)
+        message = f"Fsync {path}"
         self._stage(add=path, message=message)
 
         log.debug("CurrentView: Fsync %s", path)
@@ -181,7 +180,7 @@ class CurrentView(PassthroughView):
         global writers
         fh = self.open_for_read(path, flags)
         writers += 1
-        self.dirty[fh] = {"message": "Opened {} for write".format(path), "stage": False}
+        self.dirty[fh] = {"message": f"Opened {path} for write", "stage": False}
 
         log.debug("CurrentView: Open %s for write", path)
         return fh
@@ -225,7 +224,7 @@ class CurrentView(PassthroughView):
     @write_operation
     @not_in("ignore", check=["path"])
     def rmdir(self, path):
-        message = "Delete the {} directory".format(path)
+        message = f"Delete the {path} directory"
 
         # Unlink all the files
         full_path = self.repo._full_path(path)
@@ -237,7 +236,7 @@ class CurrentView(PassthroughView):
                     self._stage(remove=os.path.join(path, _file), message=message)
 
         # Delete the actual directory
-        result = super(CurrentView, self).rmdir("{}/".format(path))
+        result = super(CurrentView, self).rmdir(f"{path}/")
         log.debug("CurrentView: %s", message)
 
         return result
@@ -247,7 +246,7 @@ class CurrentView(PassthroughView):
     def unlink(self, path):
         result = super(CurrentView, self).unlink(path)
 
-        message = "Deleted {}".format(path)
+        message = f"Deleted {path}"
         self._stage(remove=path, message=message)
 
         log.debug("CurrentView: Deleted %s", path)
@@ -263,7 +262,7 @@ class CurrentView(PassthroughView):
                 paths = self._get_files_from_path(add)
                 if paths:
                     for path in paths:
-                        path = path.replace("{}/".format(add), "{}/".format(remove))
+                        path = path.replace(f"{add}/", f"{remove}/")
                         self.repo.index.remove(path)
                 else:
                     self.repo.index.remove(remove)
@@ -291,7 +290,7 @@ class CurrentView(PassthroughView):
         workdir = self.repo._repo.workdir
 
         if os.path.isdir(full_path):
-            for (dirpath, dirs, files) in os.walk(full_path):
+            for dirpath, dirs, files in os.walk(full_path):
                 for filename in files:
                     paths.append("{}/{}".format(dirpath.replace(workdir, ""), filename))
         return paths

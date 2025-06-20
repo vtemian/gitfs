@@ -47,7 +47,8 @@ GitFS is a Python FUSE (Filesystem in Userspace) filesystem that integrates with
 - **Clean test artifacts**: `make clean` (removes build and test directories)
 
 ### Code Quality
-- **Format code**: `make lint` (runs black formatter with Python 3.11+ compatibility)
+- **Format code**: `make format` (runs ruff formatter with Python 3.11+ compatibility)
+- **Lint code**: `make lint` (checks code formatting with ruff)
 - **Verify formatting**: `make verify-lint` (ensures code is properly formatted)
 
 ### Building

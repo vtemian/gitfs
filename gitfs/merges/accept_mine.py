@@ -16,12 +16,13 @@
 import pygit2
 
 from gitfs.log import log
+
 from .base import Merger
 
 
 class AcceptMine(Merger):
     def _create_remote_copy(self, branch_name, upstream, new_branch):
-        reference = "{}/{}".format(upstream, branch_name)
+        reference = f"{upstream}/{branch_name}"
 
         remote = self.repository.branches.remote.get(reference)
         remote_commit = self.repository[remote.target.hex]
@@ -128,10 +129,14 @@ class AcceptMine(Merger):
                     )
                     self.repository.index.add(ours.path)
                 else:
-                    log.debug("AcceptMine: overwrite all file with our " "content")
+                    log.debug("AcceptMine: overwrite all file with our content")
                     with open(self.repository._full_path(ours.path), "w") as f:
                         data = self.repository.get(ours.id).data
-                        f.write(data.decode('utf-8') if isinstance(data, bytes) else str(data))
+                        f.write(
+                            data.decode("utf-8")
+                            if isinstance(data, bytes)
+                            else str(data)
+                        )
                     self.repository.index.add(ours.path)
         else:
             log.info("AcceptMine: No conflicts to solve")
