@@ -30,7 +30,6 @@ from pygit2 import (
     GIT_BRANCH_LOCAL,
     GIT_FILEMODE_BLOB_EXECUTABLE,
 )
-from six import iteritems
 
 from gitfs.cache import CommitCache
 from gitfs.log import log
@@ -94,7 +93,7 @@ class Repository(object):
         self.ignore.update()
 
         status = self._repo.status()
-        for path, status in iteritems(status):
+        for path, status in status.items():
             # path is in current status, move on
             if status == GIT_STATUS_CURRENT:
                 continue
@@ -134,7 +133,7 @@ class Repository(object):
         return path
 
     def push(self, upstream, branch, credentials):
-        """ Push changes from a branch to a remote
+        """Push changes from a branch to a remote
 
         Examples::
 
@@ -157,7 +156,7 @@ class Repository(object):
         return behind
 
     def commit(self, message, author, commiter, parents=None, ref="HEAD"):
-        """ Wrapper for create_commit. It creates a commit from a given ref
+        """Wrapper for create_commit. It creates a commit from a given ref
         (default is HEAD)
         """
 
@@ -423,7 +422,7 @@ class Repository(object):
         return remote.get_object()
 
     def get_remote(self, name):
-        """ Retrieve a remote by name. Raise a ValueError if the remote was not
+        """Retrieve a remote by name. Raise a ValueError if the remote was not
         added to repo
 
         Examples::

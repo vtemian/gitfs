@@ -15,7 +15,7 @@ import random
 import time
 
 import pygit2
-from six.moves.queue import Empty
+from queue import Empty
 
 from gitfs.worker.peasant import Peasant
 from gitfs.merges import AcceptMine
@@ -44,7 +44,7 @@ class SyncWorker(Peasant):
         commiter_email,
         strategy=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super(SyncWorker, self).__init__(*args, **kwargs)
 
@@ -111,7 +111,7 @@ class SyncWorker(Peasant):
             log.debug("Start syncing, first attempt.")
             while not self.sync() and count < 5:
                 fuzz = random.randint(0, 1000) / 1000
-                wait = 2 ** count + fuzz
+                wait = 2**count + fuzz
 
                 log.debug("Failed to sync. Going to sleep for %d seconds", wait)
                 time.sleep(wait)
