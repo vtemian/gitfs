@@ -79,4 +79,4 @@ gh-pages: docs
 	echo -n "(autodoc) " > /tmp/COMMIT_MESSAGE ; git log -1 --pretty=%B >> /tmp/COMMIT_MESSAGE ; echo >> /tmp/COMMIT_MESSAGE ; echo "Commited-By: $$CI_BUILD_URL" >> /tmp/COMMIT_MESSAGE
 	git commit -F /tmp/COMMIT_MESSAGE
 
-.PHONY: clean test testenv virtualenv drone all format
+.PHONY: clean test testenv virtualenv all format
