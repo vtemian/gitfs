@@ -91,7 +91,7 @@ class TestRepository(RepositoryBaseTest):
             assert mocked_repo.index.write_tree.call_count == 1
             assert mocked_repo.index.write.call_count == 1
 
-            mocked_signature.has_calls([call(*author), call(*commiter)])
+            mocked_signature.assert_has_calls([call(*author), call(*commiter)])
             mocked_repo.revparse_single.assert_called_once_with("HEAD")
             mocked_repo.create_commit.assert_called_once_with(
                 "HEAD", "signature", "signature", "message", "tree", [1]
@@ -283,7 +283,7 @@ class TestRepository(RepositoryBaseTest):
         repo.get_git_object = mocked_git_object
 
         assert repo.get_blob_size("tree", "path") == 42
-        mocked_git_object.has_calls([call("tree", "path")])
+        mocked_git_object.assert_has_calls([call("tree", "path")])
 
     def test_get_blob_data(self):
         mocked_repo = MagicMock()
@@ -294,7 +294,7 @@ class TestRepository(RepositoryBaseTest):
         repo.get_git_object = mocked_git_object
 
         assert repo.get_blob_data("tree", "path") == "some data"
-        mocked_git_object.has_calls([call("tree", "path")])
+        mocked_git_object.assert_has_calls([call("tree", "path")])
 
     def test_find_diverge_commits_first_from_second(self):
         mocked_repo = MagicMock()

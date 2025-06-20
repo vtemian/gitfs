@@ -27,7 +27,7 @@ class TestNotIn(object):
         mocked_object = MagicMock()
         mocked_object.ignore = CachedIgnore()
         mocked_inspect = MagicMock()
-        mocked_inspect.getargspec.return_value = [["file"]]
+        mocked_inspect.getfullargspec.return_value = [["file"]]
 
         with patch.multiple("gitfs.utils.decorators.not_in", inspect=mocked_inspect):
             not_in("ignore", check=["file"])(mocked_function)(mocked_object, "file")
@@ -36,7 +36,7 @@ class TestNotIn(object):
 
     def test_in_cache(self):
         mocked_inspect = MagicMock()
-        mocked_inspect.getargspec.return_value = [["file"]]
+        mocked_inspect.getfullargspec.return_value = [["file"]]
         mocked_gitignore = MagicMock()
         mocked_gitignore.get.return_value = True
         mocked_look_at = MagicMock()
@@ -48,7 +48,7 @@ class TestNotIn(object):
 
     def test_has_key(self):
         mocked_inspect = MagicMock()
-        mocked_inspect.getargspec.return_value = [["file"]]
+        mocked_inspect.getfullargspec.return_value = [["file"]]
         mocked_gitignore = MagicMock()
         mocked_gitignore.get.return_value = False
         mocked_look_at = MagicMock()

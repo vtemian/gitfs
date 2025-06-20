@@ -21,7 +21,7 @@ from gitfs.mounter import prepare_components, parse_args, start_fuse, get_creden
 
 class EmptyObject(object):
     def __init__(self, **kwargs):
-        for name, value in items(kwargs):
+        for name, value in kwargs.items():
             setattr(self, name, value)
 
 
@@ -131,14 +131,15 @@ class TestMount(object):
             asserted_calls = [
                 call("remote_url", help="repo to be cloned"),
                 call("mount_point", help="where the repo should be mount"),
+                call("-v", "--version", action="version", version="%(prog)s 0.5.2"),
                 call(
                     "-o",
                     help="other options: repo_path, "
                     + "user, group, branch, max_size, "
-                    + "max_offset, fetch_timeout, merge_timeout",
+                    + "max_offset, fetch_timeout, merge_timeout, ssh_user",
                 ),
             ]
-            mocked_parser.add_argument.has_calls(asserted_calls)
+            mocked_parser.add_argument.assert_has_calls(asserted_calls)
 
     def test_start_fuse(self):
         mocked_parse_args = MagicMock()

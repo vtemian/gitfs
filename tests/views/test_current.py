@@ -402,8 +402,8 @@ class TestCurrentView(object):
         mocked_repo.index.add.assert_called_once_with(["to-stage"])
         mocked_repo.index.remove.assert_called_once_with(["to-stage"])
 
-        mocked_files.has_calls([call(["add"])])
-        mocked_sanitize.has_calls([call(["add"]), call(["remove"])])
+        mocked_files.assert_has_calls([call(["add"])])
+        mocked_sanitize.assert_has_calls([call(["add"]), call(["remove"])])
 
     def test_sanitize(self):
         current = CurrentView(repo="repo", repo_path="repo_path")

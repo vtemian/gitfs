@@ -55,6 +55,6 @@ class TestCommitCache(object):
         for commit_date in cache:
             assert commit_date == "2014-09-19"
 
-        mocked_repo.lookup_reference.has_calls([call("HEAD")])
+        mocked_repo.lookup_reference.assert_has_calls([call("HEAD")])
         mocked_repo.walk.assert_called_once_with("head", GIT_SORT_TIME)
         assert mocked_repo.lookup_reference().resolve.call_count == 2

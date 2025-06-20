@@ -59,7 +59,7 @@ class TestAcceptMine(object):
 
         reference = "{}/{}".format("upstream", "old_branch")
         mocked_repo.create_branch.assert_called_once_with("new_branch", mocked_commit)
-        mocked_repo.checkout.has_calls([call("ref", strategy=GIT_CHECKOUT_FORCE)])
+        mocked_repo.checkout.assert_has_calls([call(mocked_repo.lookup_reference.return_value, strategy=GIT_CHECKOUT_FORCE)])
 
         asserted_ref = "refs/heads/new_branch"
         mocked_repo.lookup_reference.assert_called_once_with(asserted_ref)
@@ -76,7 +76,7 @@ class TestAcceptMine(object):
         mine = AcceptMine(mocked_repo)
         mine.solve_conflicts(conflicts())
 
-        mocked_repo.index.remove.has_calls(
+        mocked_repo.index.remove.assert_has_calls(
             [call("simple_path", 1), call("simple_path", 2)]
         )
 
@@ -116,7 +116,7 @@ class TestAcceptMine(object):
 
             mocked_full.assert_called_once_with("path")
             mocked_open.assert_called_once_with("full_path", "w")
-            mocked_repo.get.has_calls([call("id")])
+            mocked_repo.get.assert_has_calls([call("id")])
             mocked_open().__enter__().write.assert_called_once_with("data")
             mocked_repo.index.add.assert_called_once_with("path")
 
@@ -155,7 +155,7 @@ class TestAcceptMine(object):
             "remote_branch", "upstream", "merging_remote"
         )
         mocked_find_commits.assert_called_once_with("local_copy", "remote_copy")
-        mocked_repo.checkout.has_calls(
+        mocked_repo.checkout.assert_has_calls(
             [call("refs/heads/local_branch", strategy=GIT_CHECKOUT_FORCE)]
         )
         mocked_repo.merge.assert_called_once_with(1)
@@ -165,7 +165,7 @@ class TestAcceptMine(object):
             call("refs/heads/local_branch"),
             call("refs/heads/merging_local"),
         ]
-        mocked_repo.lookup_reference.has_calls(asserted_calls)
+        mocked_repo.lookup_reference.assert_has_calls(asserted_calls)
         mocked_repo.commit.asserted_called_once_with(
             "merging: message", "author", "commiter", mocked_ref, ["target", 1]
         )
