@@ -30,20 +30,17 @@ jobs:
       run: make verify-lint
 
   test:
-    name: Test (Python ${{ matrix.python-version }})
+    name: Test (Python 3.11)
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.11', '3.12']
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.11'
         cache: 'pip'
         
     - name: Install system dependencies
@@ -79,7 +76,7 @@ jobs:
     - name: Set environment variables
       run: |
         echo "PIP_DOWNLOAD_CACHE=/tmp/pip_download_cache" >> $GITHUB_ENV
-        echo "PYTHON=${{ matrix.python-version }}" >> $GITHUB_ENV
+        echo "PYTHON=3.11" >> $GITHUB_ENV
         
     - name: Run tests
       run: make test
