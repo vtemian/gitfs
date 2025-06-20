@@ -1,6 +1,6 @@
 pipeline:
   verify-lint:
-    image: quay.io/presslabs/gitfs-test:3.6
+    image: quay.io/presslabs/gitfs-test:3.11
     commands:
       - pip3 install black
       - make verify-lint
@@ -34,9 +34,5 @@ pipeline:
 
 matrix:
   include:
-    - PYTHON_VERSION: 2.7
-    - PYTHON_VERSION: 3.4
-    - PYTHON_VERSION: 3.5
-    - PYTHON_VERSION: 3.6
-    - PYTHON_VERSION: 3.7
-    - PYTHON_VERSION: 3.8
+    - PYTHON_VERSION: 3.11
+    - PYTHON_VERSION: 3.12
