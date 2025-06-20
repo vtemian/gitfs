@@ -20,6 +20,7 @@ import tempfile
 import grp
 import sys
 
+import logging
 from logging import Formatter, StreamHandler
 from logging.handlers import TimedRotatingFileHandler, SysLogHandler
 from collections import OrderedDict
@@ -109,20 +110,24 @@ class Args(object):
             handler.setFormatter(Formatter(fmt=logger_fmt))
 
         if args.sentry_dsn != "":
-            from raven.conf import setup_logging
-            from raven.handlers.logging import SentryHandler
+            import sentry_sdk
+            from sentry_sdk.integrations.logging import LoggingIntegration
 
-            sentry_handler = SentryHandler(
-                args.sentry_dsn,
-                tags={
-                    "owner": args.user,
-                    "remote": args.remote_url,
-                    "mountpoint": args.mount_point,
-                },
+            sentry_logging = LoggingIntegration(
+                level=logging.INFO,
+                event_level=logging.ERROR
             )
-            sentry_handler.setLevel("ERROR")
-            setup_logging(sentry_handler)
-            log.addHandler(sentry_handler)
+            
+            sentry_sdk.init(
+                dsn=args.sentry_dsn,
+                integrations=[sentry_logging],
+                traces_sample_rate=0.0,
+                profiles_sample_rate=0.0,
+            )
+            
+            sentry_sdk.set_tag("owner", args.user)
+            sentry_sdk.set_tag("remote", args.remote_url)
+            sentry_sdk.set_tag("mountpoint", args.mount_point)
 
         handler.setLevel(args.log_level.upper())
         log.setLevel(args.log_level.upper())
