@@ -15,7 +15,6 @@
 
 from mock import MagicMock, patch, call
 
-from six import iteritems
 
 from gitfs.utils.args import Args
 
@@ -74,7 +73,7 @@ class TestArgs(object):
                 "not_magic": "False",
                 "ssh_user": "user",
             }
-            for name, value in iteritems(asserted_results):
+            for name, value in asserted_results.items():
                 assert value == getattr(args, name)
 
             assert args.config == mocked_args
@@ -82,4 +81,4 @@ class TestArgs(object):
             assert mocked_file.mkdtemp.call_count == 1
             mocked_log.setLevel.assert_called_once_with("DEBUG")
             mocked_urlparse.assert_has_calls([call(url), call("ssh://" + url)])
-            mocked_grp.getgrgid.has_calls([call(1)])
+            mocked_grp.getgrgid.assert_has_calls([call(1)])

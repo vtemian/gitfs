@@ -22,4 +22,4 @@ echo "just testing around here" >> testing
 touch me
 git add .
 git commit -m "Initial test commit"
-git push -u origin master
+git push -u origin main

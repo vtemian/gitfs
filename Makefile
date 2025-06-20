@@ -39,18 +39,16 @@ $(BUILD_DIR):
 $(VIRTUAL_ENV)/bin/py.test: $(VIRTUAL_ENV)/bin/pip$(PYTHON)
 	@touch $@
 
-$(VIRTUAL_ENV)/bin/pip2.7:
-	virtualenv --setuptools $(VIRTUAL_ENV)
-
 $(VIRTUAL_ENV)/bin/pip%:
-	virtualenv --setuptools $(VIRTUAL_ENV) -ppython$*
+	python$* -m venv $(VIRTUAL_ENV)
+	$(VIRTUAL_ENV)/bin/pip install --upgrade pip setuptools
 
 virtualenv: $(VIRTUAL_ENV)/bin/pip$(PYTHON)
 
 testenv: virtualenv
 	script/testenv
 
-test: testenv
+test: clean testenv
 	script/test
 
 clean:
