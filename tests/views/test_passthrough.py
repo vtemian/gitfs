@@ -25,7 +25,7 @@ from gitfs.views import PassthroughView
 
 
 class TestPassthrough(object):
-    def setup(self):
+    def setup_method(self):
         root = "/the/root/path"
 
         def _full_path(partial):

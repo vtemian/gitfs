@@ -56,7 +56,7 @@ class pull(object):
 
 
 class BaseTest(object):
-    def setup(self):
+    def setup_method(self):
         self.mount_path = "{}".format(os.environ["MOUNT_PATH"])
 
         self.repo_name = os.environ["REPO_NAME"]

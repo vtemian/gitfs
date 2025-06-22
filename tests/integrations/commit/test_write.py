@@ -17,7 +17,7 @@ from tests.integrations import ReadOnlyFSTest
 
 
 class TestWriteCommitView(ReadOnlyFSTest):
-    def setup(self):
+    def setup_method(self):
         super(TestWriteCommitView, self).setup()
         date = self.get_commit_dates()
         self.path = "{}/history/{}/{}".format(

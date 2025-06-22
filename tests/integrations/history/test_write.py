@@ -17,6 +17,6 @@ from tests.integrations import ReadOnlyFSTest
 
 
 class TestWriteHistoryView(ReadOnlyFSTest):
-    def setup(self):
+    def setup_method(self):
         super(TestWriteHistoryView, self).setup()
         self.path = "{}/history".format(self.mount_path)
