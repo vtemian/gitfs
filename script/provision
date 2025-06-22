@@ -1,37 +1,72 @@
 #!/usr/bin/env bash
 
-export PYTHON_VERSION=python3.7
+set -e
+
+export PYTHON_VERSION=python3.11
 
 function python {
     $PYTHON_VERSION "$@"
 }
 
-echo "I am provisioning..."
+echo "I am provisioning GitFS development environment..."
 sudo sh -c 'date > /etc/vagrant_provisioned_at'
 
-echo "Installing dependencies"
-sudo add-apt-repository ppa:presslabs/gitfs
+echo "Updating package index..."
 sudo apt-get update
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q python-virtualenv python-dev libffi-dev build-essential git-core "$PYTHON_VERSION-dev" libgit2-dev "$PYTHON_VERSION-venv" libfuse-dev libfuse2
 
-echo "Configuring fuse"
-sudo groupadd fuse
-sudo adduser "$USER" fuse
-sudo sh -c "echo 'user_allow_other' >> /etc/fuse.conf"
+echo "Installing system dependencies..."
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q \
+    build-essential \
+    software-properties-common \
+    git \
+    curl \
+    "$PYTHON_VERSION" \
+    "$PYTHON_VERSION-dev" \
+    "$PYTHON_VERSION-venv" \
+    python3-pip \
+    libffi-dev \
+    libgit2-dev \
+    libfuse-dev \
+    fuse \
+    pkg-config
 
-echo "Configure virtualenv"
+echo "Configuring FUSE..."
+sudo groupadd -f fuse
+sudo usermod -a -G fuse "$USER"
+sudo chmod 666 /dev/fuse
+echo 'user_allow_other' | sudo tee -a /etc/fuse.conf > /dev/null
+sudo chmod 644 /etc/fuse.conf
+
+echo "Setting up Python virtual environment..."
 python -m venv /home/vagrant/gitfs
-echo "source $HOME/gitfs/bin/activate" >> "$HOME/.bashrc"
+echo "source \$HOME/gitfs/bin/activate" >> "$HOME/.bashrc"
 
-echo Installing cffi
-/home/vagrant/gitfs/bin/pip install -q 'cffi'
+echo "Upgrading pip in virtual environment..."
+/home/vagrant/gitfs/bin/pip install --upgrade pip setuptools wheel
 
-echo Installing requirements
+echo "Installing cffi..."
+/home/vagrant/gitfs/bin/pip install -q 'cffi>=1.15.1'
+
+echo "Installing Python dependencies..."
+/home/vagrant/gitfs/bin/pip install -q -r /vagrant/requirements.txt
 /home/vagrant/gitfs/bin/pip install -q -r /vagrant/test_requirements.txt
 
-echo Configuring git
+echo "Configuring Git..."
 git config --global user.email "vagrant@localhost"
 git config --global user.name "Vagrant"
+git config --global init.defaultBranch main
 
-echo Installing gitfs
-"$HOME/gitfs/bin/pip" install -q -e /vagrant
+echo "Installing GitFS in development mode..."
+/home/vagrant/gitfs/bin/pip install -q -e /vagrant
+
+echo "Installing ruff for code formatting..."
+/home/vagrant/gitfs/bin/pip install -q ruff
+
+echo "Provisioning completed successfully!"
+echo "GitFS development environment is ready."
+echo ""
+echo "To get started:"
+echo "  vagrant ssh"
+echo "  cd /vagrant"
+echo "  source ~/gitfs/bin/activate"
+echo "  make test"
