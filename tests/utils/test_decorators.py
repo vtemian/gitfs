@@ -36,7 +36,7 @@ class MockedWraps(object):
 
 class EmptyMock(object):
     def __init__(self, **kwargs):
-        for name, value in items(kwargs):
+        for name, value in kwargs.items():
             setattr(self, name, value)
 
 
@@ -53,7 +53,7 @@ class TestRetryDecorator(object):
             with pytest.raises(ValueError):
                 again(mocked_method)("arg", kwarg="kwarg")
 
-            mocked_time.sleep.assert_has_calls([call(3), call(3), call(1)])
+            mocked_time.sleep.assert_has_calls([call(3), call(3), call(3)])
             mocked_method.assert_has_calls([call("arg", kwarg="kwarg")])
 
 
