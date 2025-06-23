@@ -13,14 +13,14 @@ class TestRepository(BaseTest):
         self.sh.git.add(file_name)
         self.sh.git.commit("-m", '"Just a message."')
         with gitfs_log(["FetchWorker: Fetch done", "SyncWorker: Set push_successful"]):
-            self.sh.git.push("origin", "master")
+            self.sh.git.push("origin", "main")
 
         self.sh.chmod("755", file_name)
 
         self.sh.git.add(file_name)
         self.sh.git.commit("-m", '"Just a message."')
         with gitfs_log(["FetchWorker: Fetch done", "SyncWorker: Set push_successful"]):
-            self.sh.git.push("origin", "master")
+            self.sh.git.push("origin", "main")
 
         assert os.path.exists(
             "{}/history/{}/{}".format(
@@ -41,7 +41,7 @@ class TestRepository(BaseTest):
         self.sh.git.add(file_name)
         self.sh.git.commit("-m", '"Just a message."')
         with gitfs_log(["FetchWorker: Fetch done", "SyncWorker: Set push_successful"]):
-            self.sh.git.push("origin", "master")
+            self.sh.git.push("origin", "main")
 
         assert os.path.exists(self.current_path + "/" + file_name)
         assert os.path.exists(
@@ -61,7 +61,7 @@ class TestRepository(BaseTest):
 
         self.sh.git.add(file_name)
         self.sh.git.commit("-m", '"Just a message."')
-        self.sh.git.push("origin", "master")
+        self.sh.git.push("origin", "main")
 
         with open(os.path.join(self.remote_repo_path, file_name), "w") as f:
             f.write(content)
@@ -69,7 +69,7 @@ class TestRepository(BaseTest):
         self.sh.git.add(file_name)
         self.sh.git.commit("-m", '"Just a message."')
         with gitfs_log(["FetchWorker: Fetch done", "SyncWorker: Set push_successful"]):
-            self.sh.git.push("origin", "master")
+            self.sh.git.push("origin", "main")
 
         with open(self.repo_path + "/" + file_name) as f:
             assert f.read() == content
@@ -92,7 +92,7 @@ class TestRepository(BaseTest):
 
         self.sh.git.add(file_name)
         self.sh.git.commit("-m", '"Just a message."')
-        self.sh.git.push("origin", "master")
+        self.sh.git.push("origin", "main")
 
         with open(self.repo_path + "/" + file_name, "w") as f:
             pass
@@ -118,14 +118,14 @@ class TestRepository(BaseTest):
         self.sh.git.add(file_name)
         self.sh.git.commit("-m", '"Just a message."')
         with gitfs_log(["FetchWorker: Fetch done", "SyncWorker: Set push_successful"]):
-            self.sh.git.push("origin", "master")
+            self.sh.git.push("origin", "main")
 
         self.sh.rm(file_name)
 
         self.sh.git.rm(file_name)
         self.sh.git.commit("-m", '"Just a message."')
         with gitfs_log(["FetchWorker: Fetch done", "SyncWorker: Set push_successful"]):
-            self.sh.git.push("origin", "master")
+            self.sh.git.push("origin", "main")
 
         assert not os.path.exists(self.current_path + "/" + file_name)
         assert os.path.exists(

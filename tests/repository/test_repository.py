@@ -29,7 +29,7 @@ from pygit2 import (
 from gitfs.repository import Repository
 from .base import RepositoryBaseTest
 
-Commit = namedtuple("Commit", "hex")
+Commit = namedtuple("Commit", "id")
 
 
 class TestRepository(RepositoryBaseTest):
@@ -49,7 +49,7 @@ class TestRepository(RepositoryBaseTest):
     def test_fetch(self):
         class MockedCommit(object):
             @property
-            def hex(self):
+            def id(self):
                 time.sleep(0.1)
                 return time.time()
 
@@ -336,7 +336,7 @@ class TestRepository(RepositoryBaseTest):
             second_branch = [Commit(1), Commit(0), Commit(2), Commit(3)]
 
             for index, commit in enumerate(first_branch):
-                yield (commit, second_branch[index])
+                yield commit, second_branch[index]
 
         repo = Repository(mocked_repo)
         repo.walk_branches = walker

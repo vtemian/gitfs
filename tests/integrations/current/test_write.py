@@ -27,8 +27,9 @@ class TestWriteCurrentView(BaseTest):
 
         with gitfs_log("SyncWorker: Set push_successful"):
             os.makedirs(directory)
+
         with pull(self.sh):
-            # check if directory exists or not
+            # check if a directory exists or not
             directory_path = "{}/new directory".format(self.repo_path)
             assert os.path.exists(directory_path)
 

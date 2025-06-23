@@ -60,10 +60,10 @@ class CommitCache:
 
 
 class Commit:
-    __slots__ = ["hex", "time", "timestamp"]
+    __slots__ = ["id", "time", "timestamp"]
 
     def __init__(self, timestamp, time, hex):
-        self.hex = hex
+        self.id = hex
         self.time = time
         self.timestamp = timestamp
 
@@ -71,4 +71,4 @@ class Commit:
         return self.timestamp > commit.timestamp
 
     def __repr__(self):
-        return f"{self.time}-{self.hex[:10]}"
+        return f"{self.time}-{self.id[:10]}"

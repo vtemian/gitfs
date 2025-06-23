@@ -49,7 +49,7 @@ class pull(object):
         self.sh = sh
 
     def __enter__(self):
-        self.sh.git.pull("origin", "master")
+        self.sh.git.pull("origin", "main")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass

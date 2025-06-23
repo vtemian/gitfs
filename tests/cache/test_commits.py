@@ -39,7 +39,7 @@ class TestCommitCache(object):
         mocked_repo.lookup_reference().resolve().target = "head"
         mocked_repo.walk.return_value = [mocked_commit]
         mocked_commit.commit_time = 1411135000
-        mocked_commit.hex = "1111111111"
+        mocked_commit.id = "1111111111"
 
         cache = CommitCache(mocked_repo)
         cache.update()

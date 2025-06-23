@@ -134,9 +134,9 @@ class Repository:
     def push(self, upstream, branch, credentials):
         """Push changes from a branch to a remote
 
-        Examples::
+        Examples:
 
-                repo.push("origin", "master")
+                repo.push("origin", "main")
         """
 
         remote = self.get_remote(upstream)

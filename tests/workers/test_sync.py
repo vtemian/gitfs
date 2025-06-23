@@ -71,7 +71,7 @@ class TestSyncWorker(object):
         mocked_strategy = MagicMock()
         mocked_repo = MagicMock()
         upstream = "origin"
-        branch = "master"
+        branch = "main"
 
         worker = SyncWorker(
             "name",
@@ -90,7 +90,7 @@ class TestSyncWorker(object):
 
     def test_sync(self):
         upstream = "origin"
-        branch = "master"
+        branch = "main"
         credentials = "credentials"
         mocked_repo = MagicMock()
         mocked_merge = MagicMock()
@@ -136,7 +136,7 @@ class TestSyncWorker(object):
 
     def test_sync_with_push_conflict(self):
         upstream = "origin"
-        branch = "master"
+        branch = "main"
         credentials = "credentials"
         mocked_repo = MagicMock()
         mocked_merge = MagicMock()

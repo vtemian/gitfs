@@ -32,7 +32,7 @@ class TestAcceptMine(object):
         mocked_branch = MagicMock()
         mocked_commit = MagicMock()
 
-        mocked_branch.target.hex = "local_commit"
+        mocked_branch.target.id = "local_commit"
         mocked_repo.branches.local.get.return_value = mocked_branch
         mocked_repo.__getitem__.return_value = mocked_commit
         mocked_repo.create_branch.return_value = "branch"
@@ -47,7 +47,7 @@ class TestAcceptMine(object):
         mocked_branch = MagicMock()
         mocked_commit = MagicMock()
 
-        mocked_branch.target.hex = "remote_commit"
+        mocked_branch.target.id = "remote_commit"
         mocked_repo.branches.remote.return_value = mocked_branch
         mocked_repo.__getitem__.return_value = mocked_commit
         mocked_repo.create_branch.return_value = "branch"
@@ -57,7 +57,6 @@ class TestAcceptMine(object):
             mine._create_remote_copy("old_branch", "upstream", "new_branch") == "branch"
         )
 
-        reference = "{}/{}".format("upstream", "old_branch")
         mocked_repo.create_branch.assert_called_once_with("new_branch", mocked_commit)
         mocked_repo.checkout.assert_has_calls([call(mocked_repo.lookup_reference.return_value, strategy=GIT_CHECKOUT_FORCE)])
 
@@ -77,7 +76,7 @@ class TestAcceptMine(object):
         mine.solve_conflicts(conflicts())
 
         mocked_repo.index.remove.assert_has_calls(
-            [call("simple_path", 1), call("simple_path", 2)]
+            [call("simple_path", 2), call("simple_path", 1)]
         )
 
     def test_solve_conflicts_they_deleted_the_file(self):

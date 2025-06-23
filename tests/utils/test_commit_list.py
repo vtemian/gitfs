@@ -21,14 +21,14 @@ from gitfs.utils.commits import CommitsList
 class TestCommitList(object):
     def test_contains(self):
         mocked_commit = MagicMock()
-        mocked_commit.hex = "hexish"
+        mocked_commit.id = "hexish"
 
         commit_list = CommitsList()
         assert mocked_commit not in commit_list
 
     def test_index(self):
         mocked_commit = MagicMock()
-        mocked_commit.hex = "hexish"
+        mocked_commit.id = "hexish"
 
         commit_list = CommitsList()
         commit_list.append(mocked_commit)
@@ -36,7 +36,7 @@ class TestCommitList(object):
 
     def test_getitem(self):
         mocked_commit = MagicMock()
-        mocked_commit.hex = "hexish"
+        mocked_commit.id = "hexish"
 
         commit_list = CommitsList()
         commit_list.append(mocked_commit)
@@ -45,7 +45,7 @@ class TestCommitList(object):
 
     def test_iter(self):
         mocked_commit = MagicMock()
-        mocked_commit.hex = "hexish"
+        mocked_commit.id = "hexish"
 
         commit_list = CommitsList()
         commit_list.append(mocked_commit)
@@ -56,7 +56,7 @@ class TestCommitList(object):
 
     def test_repr(self):
         mocked_commit = MagicMock()
-        mocked_commit.hex = "hexish"
+        mocked_commit.id = "hexish"
 
         commit_list = CommitsList()
         commit_list.append(mocked_commit)
@@ -65,7 +65,7 @@ class TestCommitList(object):
 
     def test_len(self):
         mocked_commit = MagicMock()
-        mocked_commit.hex = "hexish"
+        mocked_commit.id = "hexish"
 
         commit_list = CommitsList()
         commit_list.append(mocked_commit)
