@@ -38,7 +38,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     To get started:
       vagrant ssh
       cd /vagrant
-      source ~/gitfs/bin/activate
+      source venv/bin/activate
       make test
   MSG
 end

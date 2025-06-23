@@ -62,6 +62,8 @@ class Router:
         self.history_path = history_path
         self.branch = branch
 
+        print("branch", branch)
+
         self.routes = []
 
         log.info(f"Cloning into {self.repo_path}")

@@ -19,10 +19,10 @@ class CommitsList:
         self.hashes = hashes or []
 
     def __contains__(self, commit):
-        return commit.hex in self.hashes
+        return str(commit.id) in self.hashes
 
     def index(self, commit):
-        return self.hashes.index(commit.hex)
+        return self.hashes.index(str(commit.id))
 
     def __getitem__(self, val):
         commits = self.commits[val]
@@ -34,7 +34,7 @@ class CommitsList:
 
     def append(self, commit):
         self.commits.append(commit)
-        self.hashes.append(commit.hex)
+        self.hashes.append(str(commit.id))
 
     def __repr__(self):
         return self.commits.__repr__()

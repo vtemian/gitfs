@@ -25,7 +25,7 @@ class AcceptMine(Merger):
         reference = f"{upstream}/{branch_name}"
 
         remote = self.repository.branches.remote.get(reference)
-        remote_commit = self.repository[remote.target.hex]
+        remote_commit = self.repository[remote.target]
 
         # TODO: add tests and checks for failures
 
@@ -37,7 +37,7 @@ class AcceptMine(Merger):
 
     def _create_local_copy(self, branch_name, new_branch):
         branch = self.repository.branches.local.get(branch_name)
-        branch_commit = self.repository[branch.target.hex]
+        branch_commit = self.repository[branch.target]
 
         # TODO: add tests and checks for failures
 
@@ -59,8 +59,8 @@ class AcceptMine(Merger):
 
         # actual merging
         for commit in diverge_commits.first_commits:
-            log.debug("AcceptMine: Merging %s", commit.hex)
-            self.repository.merge(commit.hex)
+            log.debug("AcceptMine: Merging %s", str(commit.id))
+            self.repository.merge(commit.id)
 
             log.debug("AcceptMine: Solving conflicts")
             self.solve_conflicts(self.repository.index.conflicts)

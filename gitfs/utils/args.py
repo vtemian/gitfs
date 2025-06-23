@@ -41,7 +41,7 @@ class Args:
                 ("ssh_key", (self.get_ssh_key, "string")),
                 ("ssh_user", (self.get_ssh_user, "string")),
                 ("foreground", (False, "bool")),
-                ("branch", ("master", "string")),
+                ("branch", ("main", "string")),
                 ("allow_other", (False, "bool")),
                 ("allow_root", (True, "bool")),
                 ("commiter_name", (self.get_commiter_user, "string")),

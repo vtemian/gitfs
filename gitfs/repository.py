@@ -191,12 +191,12 @@ class Repository:
 
         """
 
-        try:
-            repo = clone_repository(
-                remote_url, path, checkout_branch=branch, callbacks=credentials
-            )
-        except Exception:
-            log.error("Error on cloning the repository: ", exc_info=True)
+        # try:
+        repo = clone_repository(
+            remote_url, path, checkout_branch=branch, callbacks=credentials
+        )
+        # except Exception:
+            # log.error("Error on cloning the repository: ", exc_info=True)
 
         repo.checkout_head()
         return cls(repo)
@@ -476,7 +476,7 @@ class Repository:
             if second_commit not in second_commits:
                 second_commits.append(second_commit)
 
-            if second_commit.hex == first_commit.hex:
+            if second_commit.id == first_commit.id:
                 break
 
         try:

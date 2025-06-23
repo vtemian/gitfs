@@ -122,10 +122,12 @@ def start_fuse():
     parser = argparse.ArgumentParser(prog="GitFS")
     args = parse_args(parser)
 
-    try:
-        merge_worker, fetch_worker, router = prepare_components(args)
-    except:
-        return
+    # try:
+    print("Preparing components...", args)
+    merge_worker, fetch_worker, router = prepare_components(args)
+    # except:
+    #     print("Error while preparing components, exiting...")
+    #     return
 
     if args.max_open_files != -1:
         resource.setrlimit(

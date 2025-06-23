@@ -38,7 +38,7 @@ class CommitCache:
                 new_commits[date] = []
 
             insort_left(
-                new_commits[date], Commit(commit.commit_time, time, commit.hex[:10])
+                new_commits[date], Commit(commit.commit_time, time, str(commit.id)[:10])
             )
 
         self.__commits = new_commits
