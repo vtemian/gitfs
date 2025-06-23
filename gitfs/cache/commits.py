@@ -13,13 +13,13 @@
 # limitations under the License.
 
 
-from datetime import datetime
 from bisect import insort_left
+from datetime import datetime
 
 from pygit2 import GIT_SORT_TIME
 
 
-class CommitCache(object):
+class CommitCache:
     def __init__(self, repo):
         self.repo = repo
         self.__commits = {}
@@ -38,7 +38,7 @@ class CommitCache(object):
                 new_commits[date] = []
 
             insort_left(
-                new_commits[date], Commit(commit.commit_time, time, commit.hex[:10])
+                new_commits[date], Commit(commit.commit_time, time, str(commit.id)[:10])
             )
 
         self.__commits = new_commits
@@ -59,11 +59,11 @@ class CommitCache(object):
         return iter(self.__commits)
 
 
-class Commit(object):
-    __slots__ = ["hex", "time", "timestamp"]
+class Commit:
+    __slots__ = ["id", "time", "timestamp"]
 
     def __init__(self, timestamp, time, hex):
-        self.hex = hex
+        self.id = hex
         self.time = time
         self.timestamp = timestamp
 
@@ -71,4 +71,4 @@ class Commit(object):
         return self.timestamp > commit.timestamp
 
     def __repr__(self):
-        return "{}-{}".format(self.time, self.hex[:10])
+        return f"{self.time}-{self.id[:10]}"

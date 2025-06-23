@@ -13,26 +13,24 @@
 # limitations under the License.
 
 
-import re
-import os
-import time
-import shutil
 import inspect
-
-from pwd import getpwnam
-from grp import getgrnam
-
+import os
+import re
+import shutil
+import time
 from errno import ENOSYS
+from grp import getgrnam
+from pwd import getpwnam
 
 from fuse import FUSE, FuseOSError
 
-from gitfs.repository import Repository
 from gitfs.cache import CachedIgnore, lru_cache
-from gitfs.events import shutting_down, fetch, idle
+from gitfs.events import fetch, idle, shutting_down
 from gitfs.log import log
+from gitfs.repository import Repository
 
 
-class Router(object):
+class Router:
     def __init__(
         self,
         remote_url,
@@ -44,7 +42,7 @@ class Router(object):
         branch=None,
         user="root",
         group="root",
-        **kwargs
+        **kwargs,
     ):
         """
         Clone repo from a remote into repo_path/<repo_name> and checkout to
@@ -64,9 +62,11 @@ class Router(object):
         self.history_path = history_path
         self.branch = branch
 
+        print("branch", branch)
+
         self.routes = []
 
-        log.info("Cloning into {}".format(self.repo_path))
+        log.info(f"Cloning into {self.repo_path}")
 
         self.repo = Repository.clone(
             self.remote_url, self.repo_path, self.branch, credentials
@@ -139,10 +139,10 @@ class Router(object):
             view, relative_path = self.get_view(path)
             args = (relative_path,) + args[1:]
 
-        log.debug("Call %s %s with %r" % (operation, view.__class__.__name__, args))
+        log.debug(f"Call {operation} {view.__class__.__name__} with {args!r}")
 
         if not hasattr(view, operation):
-            log.debug("No attribute %s on %s" % (operation, view.__class__.__name__))
+            log.debug(f"No attribute {operation} on {view.__class__.__name__}")
             raise FuseOSError(ENOSYS)
 
         idle.clear()
@@ -208,7 +208,7 @@ class Router(object):
 
             return view, relative_path
 
-        raise ValueError("Found no view for '{}'".format(path))
+        raise ValueError(f"Found no view for '{path}'")
 
     def __getattr__(self, attr_name):
         """
@@ -218,6 +218,6 @@ class Router(object):
         """
 
         methods = inspect.getmembers(FUSE, predicate=callable)
-        fuse_allowed_methods = set(elem[0] for elem in methods)
+        fuse_allowed_methods = {elem[0] for elem in methods}
 
-        return attr_name in fuse_allowed_methods - set(["bmap", "lock"])
+        return attr_name in fuse_allowed_methods - {"bmap", "lock"}

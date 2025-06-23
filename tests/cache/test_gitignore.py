@@ -13,11 +13,12 @@
 # limitations under the License.
 
 
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
+
 from gitfs.cache import CachedIgnore
 
 
-class TestCachedIgnore(object):
+class TestCachedIgnore:
     def test_init(self):
         mocked_os = MagicMock()
         mocked_os.path.exists.return_value = True

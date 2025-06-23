@@ -13,8 +13,9 @@
 # limitations under the License.
 
 
-import pytest
 import errno
+
+import pytest
 
 from tests.integrations.base import BaseTest
 
@@ -23,7 +24,7 @@ class ReadOnlyFSTest(BaseTest):
     path = ""
 
     def test_write_to_new_file(self):
-        filename = "{}/new_file".format(self.path)
+        filename = f"{self.path}/new_file"
         content = "Read only filesystem"
 
         with pytest.raises(IOError) as err:

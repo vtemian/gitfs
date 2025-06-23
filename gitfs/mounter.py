@@ -13,19 +13,18 @@
 # limitations under the License.
 
 
-import sys
 import argparse
 import resource
+import sys
 
 from fuse import FUSE
-from pygit2 import Keypair, UserPass
-from pygit2.remote import RemoteCallbacks
+from pygit2 import Keypair, RemoteCallbacks, UserPass
 
 from gitfs import __version__
-from gitfs.utils import Args
-from gitfs.routes import prepare_routes
 from gitfs.router import Router
-from gitfs.worker import CommitQueue, SyncWorker, FetchWorker
+from gitfs.routes import prepare_routes
+from gitfs.utils import Args
+from gitfs.worker import CommitQueue, FetchWorker, SyncWorker
 
 
 def parse_args(parser):
@@ -77,8 +76,7 @@ def prepare_components(args):
         )
     except KeyError as error:
         sys.stderr.write(
-            "Can't clone reference origin/%s from remote %s: %s\n"
-            % (args.branch, args.remote_url, error)
+            f"Can't clone reference origin/{args.branch} from remote {args.remote_url}: {error}\n"
         )
         raise error
 
@@ -88,10 +86,10 @@ def prepare_components(args):
 
     # setup workers
     merge_worker = SyncWorker(
-        args.commiter_name,
-        args.commiter_email,
-        args.commiter_name,
-        args.commiter_email,
+        args.committer_name,
+        args.committer_email,
+        args.committer_name,
+        args.committer_email,
         commit_queue=commit_queue,
         repository=router.repo,
         upstream="origin",
@@ -123,10 +121,12 @@ def start_fuse():
     parser = argparse.ArgumentParser(prog="GitFS")
     args = parse_args(parser)
 
-    try:
-        merge_worker, fetch_worker, router = prepare_components(args)
-    except:
-        return
+    # try:
+    print("Preparing components...", args)
+    merge_worker, fetch_worker, router = prepare_components(args)
+    # except:
+    #     print("Error while preparing components, exiting...")
+    #     return
 
     if args.max_open_files != -1:
         resource.setrlimit(

@@ -14,23 +14,22 @@
 
 
 import getpass
+import grp
+import logging
 import os
 import socket
-import tempfile
-import grp
 import sys
-
-from logging import Formatter, StreamHandler
-from logging.handlers import TimedRotatingFileHandler, SysLogHandler
+import tempfile
 from collections import OrderedDict
-from six import iteritems
-from six.moves.urllib.parse import urlparse
+from logging import Formatter, StreamHandler
+from logging.handlers import SysLogHandler, TimedRotatingFileHandler
+from urllib.parse import urlparse
 
-from gitfs.log import log
 from gitfs.cache import lru_cache
+from gitfs.log import log
 
 
-class Args(object):
+class Args:
     def __init__(self, parser):
         self.DEFAULTS = OrderedDict(
             [
@@ -42,11 +41,11 @@ class Args(object):
                 ("ssh_key", (self.get_ssh_key, "string")),
                 ("ssh_user", (self.get_ssh_user, "string")),
                 ("foreground", (False, "bool")),
-                ("branch", ("master", "string")),
+                ("branch", ("main", "string")),
                 ("allow_other", (False, "bool")),
                 ("allow_root", (True, "bool")),
-                ("commiter_name", (self.get_commiter_user, "string")),
-                ("commiter_email", (self.get_commiter_email, "string")),
+                ("committer_name", (self.get_committer_user, "string")),
+                ("committer_email", (self.get_committer_email, "string")),
                 ("max_size", (10, "float")),
                 ("fetch_timeout", (30, "float")),
                 ("idle_fetch_timeout", (30 * 60, "float")),  # 30 min
@@ -94,7 +93,7 @@ class Args(object):
                 handler = TimedRotatingFileHandler(args.log, when="midnight")
             handler.setFormatter(
                 Formatter(
-                    fmt="%(asctime)s %(threadName)s: " "%(message)s",
+                    fmt="%(asctime)s %(threadName)s: %(message)s",
                     datefmt="%B-%d-%Y %H:%M:%S",
                 )
             )
@@ -104,26 +103,29 @@ class Args(object):
             else:
                 handler = SysLogHandler(address="/dev/log")
             logger_fmt = (
-                "GitFS on {mount_point} [%(process)d]: %(threadName)s: "
-                "%(message)s".format(mount_point=args.mount_point)
+                f"GitFS on {args.mount_point} [%(process)d]: %(threadName)s: "
+                "%(message)s"
             )
             handler.setFormatter(Formatter(fmt=logger_fmt))
 
         if args.sentry_dsn != "":
-            from raven.conf import setup_logging
-            from raven.handlers.logging import SentryHandler
+            import sentry_sdk
+            from sentry_sdk.integrations.logging import LoggingIntegration
 
-            sentry_handler = SentryHandler(
-                args.sentry_dsn,
-                tags={
-                    "owner": args.user,
-                    "remote": args.remote_url,
-                    "mountpoint": args.mount_point,
-                },
+            sentry_logging = LoggingIntegration(
+                level=logging.INFO, event_level=logging.ERROR
             )
-            sentry_handler.setLevel("ERROR")
-            setup_logging(sentry_handler)
-            log.addHandler(sentry_handler)
+
+            sentry_sdk.init(
+                dsn=args.sentry_dsn,
+                integrations=[sentry_logging],
+                traces_sample_rate=0.0,
+                profiles_sample_rate=0.0,
+            )
+
+            sentry_sdk.set_tag("owner", args.user)
+            sentry_sdk.set_tag("remote", args.remote_url)
+            sentry_sdk.set_tag("mountpoint", args.mount_point)
 
         handler.setLevel(args.log_level.upper())
         log.setLevel(args.log_level.upper())
@@ -144,7 +146,7 @@ class Args(object):
             return getattr(self.__dict__["config"], attr)
 
     def set_defaults(self, args):
-        for option, value in iteritems(self.DEFAULTS):
+        for option, value in self.DEFAULTS.items():
             new_value = getattr(args, option, None)
 
             if not new_value:
@@ -175,11 +177,11 @@ class Args(object):
     def get_current_user(self, args):
         return getpass.getuser()
 
-    def get_commiter_user(self, args):
+    def get_committer_user(self, args):
         return args.user
 
-    def get_commiter_email(self, args):
-        return "{}@{}".format(args.user, socket.gethostname())
+    def get_committer_email(self, args):
+        return f"{args.user}@{socket.gethostname()}"
 
     def get_repo_path(self, args):
         return tempfile.mkdtemp(dir="/var/lib/gitfs")

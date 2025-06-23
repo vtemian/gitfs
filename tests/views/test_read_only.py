@@ -16,13 +16,12 @@
 import os
 
 import pytest
-
 from fuse import FuseOSError
 
 from gitfs.views.read_only import ReadOnlyView
 
 
-class TestReadOnly(object):
+class TestReadOnly:
     def test_cant_write(self):
         view = ReadOnlyView()
 

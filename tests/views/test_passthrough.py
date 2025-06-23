@@ -13,19 +13,18 @@
 # limitations under the License.
 
 
-from io import TextIOWrapper
-from mock import MagicMock, patch, call
 import os
+from io import TextIOWrapper
+from unittest.mock import MagicMock, call, patch
 
 from fuse import FuseOSError
-from six.moves import builtins
 from pytest import raises
 
 from gitfs.views import PassthroughView
 
 
-class TestPassthrough(object):
-    def setup(self):
+class TestPassthrough:
+    def setup_method(self):
         root = "/the/root/path"
 
         def _full_path(partial):
@@ -107,7 +106,7 @@ class TestPassthrough(object):
 
             mocked_lstat.assert_called_once_with("/the/root/path/magic/path")
 
-            assert result == dict((key, getattr(mock_result, key)) for key in stats)
+            assert result == {key: getattr(mock_result, key) for key in stats}
 
     def test_stats(self):
         mocked_statvfs = MagicMock()
@@ -136,7 +135,7 @@ class TestPassthrough(object):
 
             mocked_statvfs.assert_called_once_with("/the/root/path/magic/path")
 
-            assert result == dict((key, getattr(mock_result, key)) for key in stats)
+            assert result == {key: getattr(mock_result, key) for key in stats}
 
     def test_readdir(self):
         mocked_os = MagicMock()
@@ -147,7 +146,7 @@ class TestPassthrough(object):
         with patch.multiple("gitfs.views.passthrough", os=mocked_os):
             view = PassthroughView(repo=self.repo, repo_path=self.repo_path)
             result = view.readdir("/magic/path", 0)
-            dirents = [directory for directory in result]
+            dirents = list(result)
 
             assert dirents == [".", "..", "one_dir", "one_file"]
             path = "/the/root/path/magic/path"
@@ -256,7 +255,7 @@ class TestPassthrough(object):
             assert result == "magic"
             old = "/the/root/path/magic/path"
             new = "/the/root/path/magic/new"
-            mocked_rename.has_calls([call(old), call(new)])
+            mocked_rename.assert_has_calls([call(old, new)])
 
     def test_link(self):
         mocked_link = MagicMock()
@@ -379,5 +378,5 @@ class TestPassthrough(object):
             view = PassthroughView(repo=self.repo, repo_path=self.repo_path)
             view.truncate("/magic/path", 0, 0)
 
-            mocked_open.has_calls([call("/the/root/path/magic/path", "r+")])
+            mocked_open.assert_has_calls([call("/the/root/path/magic/path", "r+")])
             mocked_file.truncate.assert_called_once_with(0)

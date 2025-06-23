@@ -13,15 +13,14 @@
 # limitations under the License.
 
 
-import time
 import os
-from stat import S_IFDIR
+import time
 from errno import ENOENT
+from stat import S_IFDIR
 
 from fuse import FuseOSError
 
 from gitfs.log import log
-from gitfs.cache import lru_cache
 
 from .read_only import ReadOnlyView
 
@@ -42,7 +41,7 @@ class HistoryView(ReadOnlyView):
         if path not in self.repo.get_commit_dates() and path != "/":
             raise FuseOSError(ENOENT)
 
-        attrs = super(HistoryView, self).getattr(path, fh)
+        attrs = super().getattr(path, fh)
         attrs.update(
             {
                 "st_mode": S_IFDIR | 0o555,
@@ -78,8 +77,7 @@ class HistoryView(ReadOnlyView):
             additional_entries = self.repo.get_commit_dates()
 
         dir_entries = [".", ".."] + additional_entries
-        for entry in dir_entries:
-            yield entry
+        yield from dir_entries
 
     def _get_commit_time(self, index):
         date = getattr(self, "date", None)

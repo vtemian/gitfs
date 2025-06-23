@@ -13,14 +13,12 @@
 # limitations under the License.
 
 
-from mock import MagicMock, patch, call
-
-from six import iteritems
+from unittest.mock import MagicMock, call, patch
 
 from gitfs.utils.args import Args
 
 
-class TestArgs(object):
+class TestArgs:
     def test_args(self):
         mocked_os = MagicMock()
         mocked_log = MagicMock()
@@ -37,10 +35,10 @@ class TestArgs(object):
 
         mocked_file.mkdtemp.return_value = "/tmp"
         mocked_pass.getuser.return_value = "test_user"
-        mocked_os.getgid.return_value = 1
+        mocked_os.getegid.return_value = 1
         mocked_os.environ = {}
         mocked_os.path.abspath.return_value = "abs/tmp"
-        mocked_grp.getgrgid().gr_name = "test_group"
+        mocked_grp.getgrgid.return_value.gr_name = "test_group"
         mocked_parser.parse_args.return_value = mocked_args
         mocked_args.remote_url = url
         mocked_parse_res1.scheme = None
@@ -70,11 +68,11 @@ class TestArgs(object):
                 "repo_path": "abs/tmp",
                 "user": "test_user",
                 "group": "test_group",
-                "branch": "master",
+                "branch": "main",
                 "not_magic": "False",
                 "ssh_user": "user",
             }
-            for name, value in iteritems(asserted_results):
+            for name, value in asserted_results.items():
                 assert value == getattr(args, name)
 
             assert args.config == mocked_args
@@ -82,4 +80,4 @@ class TestArgs(object):
             assert mocked_file.mkdtemp.call_count == 1
             mocked_log.setLevel.assert_called_once_with("DEBUG")
             mocked_urlparse.assert_has_calls([call(url), call("ssh://" + url)])
-            mocked_grp.getgrgid.has_calls([call(1)])
+            mocked_grp.getgrgid.assert_has_calls([call(1)])

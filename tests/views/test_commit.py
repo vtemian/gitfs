@@ -14,17 +14,16 @@
 
 
 from stat import S_IFDIR, S_IFREG
+from unittest.mock import MagicMock, patch
 
 import pytest
-from mock import MagicMock, patch
-
-from pygit2 import GIT_FILEMODE_TREE
 from fuse import FuseOSError
+from pygit2 import GIT_FILEMODE_TREE
 
 from gitfs.views.commit import CommitView
 
 
-class TestCommitView(object):
+class TestCommitView:
     def test_readdir_without_tree_name(self):
         mocked_repo = MagicMock()
         mocked_commit = MagicMock()
@@ -38,7 +37,7 @@ class TestCommitView(object):
         with patch("gitfs.views.commit.os") as mocked_os:
             mocked_os.path.split.return_value = [None, None]
 
-            dirs = [entry for entry in view.readdir("/path", 0)]
+            dirs = list(view.readdir("/path", 0))
             assert dirs == [".", "..", "entry"]
 
             mocked_os.path.split.assert_called_once_with("/path")
@@ -57,7 +56,7 @@ class TestCommitView(object):
         with patch("gitfs.views.commit.os") as mocked_os:
             mocked_os.path.split.return_value = [None, True]
 
-            dirs = [entry for entry in view.readdir("/path", 0)]
+            dirs = list(view.readdir("/path", 0))
             assert dirs == [".", "..", "entry"]
 
             mocked_os.path.split.assert_called_once_with("/path")

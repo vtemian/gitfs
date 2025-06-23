@@ -16,8 +16,6 @@
 import os
 from datetime import datetime
 
-from six import iteritems
-
 from tests.integrations.base import BaseTest
 
 
@@ -25,7 +23,7 @@ class TestReadCommitView(BaseTest):
     def test_listdirs(self):
         commits = self.get_commits_by_date()
         files = os.listdir(
-            "{}/history/{}/{}".format(self.mount_path, self.today, commits[-1])
+            f"{self.mount_path}/history/{self.today}/{commits[-1]}"
         )
 
         real_files = os.listdir(self.repo_path)
@@ -34,14 +32,14 @@ class TestReadCommitView(BaseTest):
 
     def test_stats(self):
         commit = self.get_commits_by_date()[0]
-        directory = "{}/history/{}/{}".format(self.mount_path, self.today, commit)
-        filename = "{}/testing".format(directory)
+        directory = f"{self.mount_path}/history/{self.today}/{commit}"
+        filename = f"{directory}/testing"
 
         stats = os.stat(filename)
 
         attrs = {"st_uid": os.getuid(), "st_gid": os.getgid(), "st_mode": 0o100444}
 
-        for name, value in iteritems(attrs):
+        for name, value in attrs.items():
             assert getattr(stats, name) == value
 
         st_time = "{} {}".format(self.today, "-".join(commit.split("-")[:-1]))

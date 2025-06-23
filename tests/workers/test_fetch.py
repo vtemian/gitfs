@@ -13,13 +13,14 @@
 # limitations under the License.
 
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from mock import patch, MagicMock
 
 from gitfs.worker.fetch import FetchWorker
 
 
-class TestFetchWorker(object):
+class TestFetchWorker:
     def test_work(self):
         mocked_peasant = MagicMock()
         mocked_fetch = MagicMock(side_effect=ValueError)

@@ -18,7 +18,7 @@ from functools import wraps
 
 from fuse import FuseOSError
 
-from gitfs.events import sync_done, syncing, writers, push_successful, fetch_successful
+from gitfs.events import fetch_successful, push_successful, sync_done, syncing, writers
 from gitfs.log import log
 
 

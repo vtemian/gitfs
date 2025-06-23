@@ -16,13 +16,12 @@
 from stat import S_IFDIR
 
 import pytest
-
 from fuse import FuseOSError
 
 from gitfs.views.index import IndexView
 
 
-class TestIndexView(object):
+class TestIndexView:
     def test_getattr_with_non_root_path(self):
         view = IndexView()
 

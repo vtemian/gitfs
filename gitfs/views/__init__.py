@@ -13,9 +13,9 @@
 # limitations under the License.
 
 
-from .index import IndexView
+from .commit import CommitView
 from .current import CurrentView
 from .history import HistoryView
-from .commit import CommitView
-from .read_only import ReadOnlyView
+from .index import IndexView
 from .passthrough import PassthroughView
+from .read_only import ReadOnlyView

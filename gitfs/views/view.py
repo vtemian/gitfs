@@ -15,12 +15,10 @@
 
 from abc import ABCMeta
 
-from fuse import Operations, LoggingMixIn
+from fuse import LoggingMixIn, Operations
 
 
-class View(LoggingMixIn, Operations):
-    __metaclass__ = ABCMeta
-
+class View(LoggingMixIn, Operations, metaclass=ABCMeta):
     def __init__(self, *args, **kwargs):
         self.args = args
 

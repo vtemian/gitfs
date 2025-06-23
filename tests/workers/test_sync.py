@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from _pygit2 import GitError
+from queue import Empty
+from unittest.mock import MagicMock, call, patch
 
-from mock import MagicMock, patch, call
-from six.moves.queue import Empty
 import pygit2
 import pytest
+from pygit2 import GitError
 
 from gitfs.worker.sync import SyncWorker
 
 
-class TestSyncWorker(object):
+class TestSyncWorker:
     def test_work(self):
         mocked_queue = MagicMock()
         mocked_idle = MagicMock(side_effect=ValueError)
@@ -72,7 +72,7 @@ class TestSyncWorker(object):
         mocked_strategy = MagicMock()
         mocked_repo = MagicMock()
         upstream = "origin"
-        branch = "master"
+        branch = "main"
 
         worker = SyncWorker(
             "name",
@@ -91,7 +91,7 @@ class TestSyncWorker(object):
 
     def test_sync(self):
         upstream = "origin"
-        branch = "master"
+        branch = "main"
         credentials = "credentials"
         mocked_repo = MagicMock()
         mocked_merge = MagicMock()
@@ -137,7 +137,7 @@ class TestSyncWorker(object):
 
     def test_sync_with_push_conflict(self):
         upstream = "origin"
-        branch = "master"
+        branch = "main"
         credentials = "credentials"
         mocked_repo = MagicMock()
         mocked_merge = MagicMock()

@@ -17,7 +17,7 @@ import time
 from functools import wraps
 
 
-class retry(object):
+class retry:
     def __init__(self, each=3, times=True):
         self.each = each
         self.times = times

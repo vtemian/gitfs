@@ -17,6 +17,6 @@ from tests.integrations import ReadOnlyFSTest
 
 
 class TestWriteIndexView(ReadOnlyFSTest):
-    def setup(self):
-        super(TestWriteIndexView, self).setup()
+    def setup_method(self):
+        super().setup_method()
         self.path = self.mount_path

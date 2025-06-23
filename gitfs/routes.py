@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from gitfs.views import IndexView, CurrentView, HistoryView, CommitView
+from gitfs.views import CommitView, CurrentView, HistoryView, IndexView
 
 
 # TODO: replace regex with the strict one for the Historyview
@@ -23,20 +23,19 @@ def prepare_routes(args):
 
     routes.append(
         (
-            r"^/%s/(?P<date>\d{4}-\d{1,2}-\d{1,2})/(?P<time>\d{2}-\d{2}-\d{2})-(?P<commit_sha1>[0-9a-f]{10})"
-            % args.history_path,
+            rf"^/{args.history_path}/(?P<date>\d{{4}}-\d{{1,2}}-\d{{1,2}})/(?P<time>\d{{2}}-\d{{2}}-\d{{2}})-(?P<commit_sha1>[0-9a-f]{{10}})",
             CommitView,
         )
     )
     routes.append(
-        (r"^/%s/(?P<date>\d{4}-\d{1,2}-\d{1,2})" % args.history_path, HistoryView)
+        (rf"^/{args.history_path}/(?P<date>\d{{4}}-\d{{1,2}}-\d{{1,2}})", HistoryView)
     )
-    routes.append((r"^/%s" % args.history_path, HistoryView))
+    routes.append((rf"^/{args.history_path}", HistoryView))
 
     if "/" == args.current_path:
         routes.append((r"^/", CurrentView))
     else:
-        routes.append((r"^/%s" % args.current_path, CurrentView))
+        routes.append((rf"^/{args.current_path}", CurrentView))
         routes.append((r"^/", IndexView))
 
     return routes

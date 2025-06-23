@@ -16,26 +16,24 @@
 import os
 from collections import namedtuple
 from shutil import rmtree
-from stat import S_IFDIR, S_IFREG, S_IFLNK
+from stat import S_IFDIR, S_IFLNK, S_IFREG
 
 from pygit2 import (
-    clone_repository,
-    Signature,
-    GIT_SORT_TOPOLOGICAL,
-    GIT_FILEMODE_TREE,
-    GIT_STATUS_CURRENT,
-    GIT_FILEMODE_LINK,
-    GIT_FILEMODE_BLOB,
     GIT_BRANCH_REMOTE,
-    GIT_BRANCH_LOCAL,
+    GIT_FILEMODE_BLOB,
     GIT_FILEMODE_BLOB_EXECUTABLE,
+    GIT_FILEMODE_LINK,
+    GIT_FILEMODE_TREE,
+    GIT_SORT_TOPOLOGICAL,
+    GIT_STATUS_CURRENT,
+    Signature,
+    clone_repository,
 )
-from six import iteritems
 
 from gitfs.cache import CommitCache
 from gitfs.log import log
-from gitfs.utils.path import split_path_into_components
 from gitfs.utils.commits import CommitsList
+from gitfs.utils.path import split_path_into_components
 
 
 DivergeCommits = namedtuple(
@@ -43,7 +41,7 @@ DivergeCommits = namedtuple(
 )
 
 
-class Repository(object):
+class Repository:
     def __init__(self, repository, commits=None):
         self._repo = repository
         self.commits = commits or CommitCache(self)
@@ -72,7 +70,7 @@ class Repository(object):
         return ahead
 
     def diverge(self, upstream, branch):
-        reference = "{}/{}".format(upstream, branch)
+        reference = f"{upstream}/{branch}"
         remote_branch = self._repo.branches.remote.get(reference)
         local_branch = self._repo.branches.local.get(branch)
 
@@ -94,7 +92,7 @@ class Repository(object):
         self.ignore.update()
 
         status = self._repo.status()
-        for path, status in iteritems(status):
+        for path, status in status.items():
             # path is in current status, move on
             if status == GIT_STATUS_CURRENT:
                 continue
@@ -134,15 +132,15 @@ class Repository(object):
         return path
 
     def push(self, upstream, branch, credentials):
-        """ Push changes from a branch to a remote
+        """Push changes from a branch to a remote
 
-        Examples::
+        Examples:
 
-                repo.push("origin", "master")
+                repo.push("origin", "main")
         """
 
         remote = self.get_remote(upstream)
-        remote.push(["refs/heads/%s" % branch], callbacks=credentials)
+        remote.push([f"refs/heads/{branch}"], callbacks=credentials)
 
     def fetch(self, upstream, branch_name, credentials):
         """
@@ -156,8 +154,8 @@ class Repository(object):
         self.behind = behind
         return behind
 
-    def commit(self, message, author, commiter, parents=None, ref="HEAD"):
-        """ Wrapper for create_commit. It creates a commit from a given ref
+    def commit(self, message, author, committer, parents=None, ref="HEAD"):
+        """Wrapper for create_commit. It creates a commit from a given ref
         (default is HEAD)
         """
 
@@ -167,7 +165,7 @@ class Repository(object):
 
         # sign the author
         author = Signature(author[0], author[1])
-        commiter = Signature(commiter[0], commiter[1])
+        committer = Signature(committer[0], committer[1])
 
         # write index localy
         tree = self._repo.index.write_tree()
@@ -177,7 +175,7 @@ class Repository(object):
         if parents is None:
             parents = [self._repo.revparse_single(ref).id]
 
-        return self._repo.create_commit(ref, author, commiter, message, tree, parents)
+        return self._repo.create_commit(ref, author, committer, message, tree, parents)
 
     @classmethod
     def clone(cls, remote_url, path, branch=None, credentials=None):
@@ -193,12 +191,12 @@ class Repository(object):
 
         """
 
-        try:
-            repo = clone_repository(
-                remote_url, path, checkout_branch=branch, callbacks=credentials
-            )
-        except Exception as e:
-            log.error("Error on cloning the repository: ", exc_info=True)
+        # try:
+        repo = clone_repository(
+            remote_url, path, checkout_branch=branch, callbacks=credentials
+        )
+        # except Exception:
+        # log.error("Error on cloning the repository: ", exc_info=True)
 
         repo.checkout_head()
         return cls(repo)
@@ -418,12 +416,12 @@ class Repository(object):
                 yield (commit for commit in commits)
 
     def remote_head(self, upstream, branch):
-        ref = "%s/%s" % (upstream, branch)
+        ref = f"{upstream}/{branch}"
         remote = self._repo.lookup_branch(ref, GIT_BRANCH_REMOTE)
         return remote.get_object()
 
     def get_remote(self, name):
-        """ Retrieve a remote by name. Raise a ValueError if the remote was not
+        """Retrieve a remote by name. Raise a ValueError if the remote was not
         added to repo
 
         Examples::
@@ -444,7 +442,7 @@ class Repository(object):
         return os.path.join(self._repo.workdir, partial)
 
     def find_diverge_commits(self, first_branch, second_branch):
-        """
+        r"""
         Take two branches and find diverge commits.
 
              2--3--4--5
@@ -478,7 +476,7 @@ class Repository(object):
             if second_commit not in second_commits:
                 second_commits.append(second_commit)
 
-            if second_commit.hex == first_commit.hex:
+            if second_commit.id == first_commit.id:
                 break
 
         try:

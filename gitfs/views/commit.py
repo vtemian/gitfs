@@ -15,18 +15,19 @@
 
 import os
 from errno import ENOENT
+
+from fuse import FuseOSError
 from pygit2 import (
-    GIT_FILEMODE_TREE,
     GIT_FILEMODE_BLOB,
     GIT_FILEMODE_BLOB_EXECUTABLE,
     GIT_FILEMODE_LINK,
+    GIT_FILEMODE_TREE,
 )
-from fuse import FuseOSError
 
 from gitfs.utils import split_path_into_components
-from gitfs.cache import lru_cache
 
 from .read_only import ReadOnlyView
+
 
 VALID_FILE_MODES = [
     GIT_FILEMODE_BLOB,
@@ -38,7 +39,7 @@ VALID_FILE_MODES = [
 
 class CommitView(ReadOnlyView):
     def __init__(self, *args, **kwargs):
-        super(CommitView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         try:
             self.commit = self.repo.revparse_single(self.commit_sha1)
@@ -96,7 +97,7 @@ class CommitView(ReadOnlyView):
         if not path:
             return
 
-        attrs = super(CommitView, self).getattr(path, fh)
+        attrs = super().getattr(path, fh)
         attrs.update(
             {"st_ctime": self.commit.commit_time, "st_mtime": self.commit.commit_time}
         )
@@ -128,5 +129,4 @@ class CommitView(ReadOnlyView):
             dir_tree = self.repo.get_git_object(self.commit.tree, path)
 
         dir_entries = [".", ".."] + [entry.name for entry in dir_tree]
-        for entry in dir_entries:
-            yield entry
+        yield from dir_entries

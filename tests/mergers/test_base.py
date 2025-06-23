@@ -13,12 +13,12 @@
 # limitations under the License.
 
 
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from gitfs.merges.base import Merger
 
 
-class TestBaseMerger(object):
+class TestBaseMerger:
     def test_peasant_work(self):
         mocked_repo = MagicMock()
 

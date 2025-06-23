@@ -13,24 +13,23 @@
 # limitations under the License.
 import random
 import time
+from queue import Empty
 
 import pygit2
-from six.moves.queue import Empty
-
-from gitfs.worker.peasant import Peasant
-from gitfs.merges import AcceptMine
 
 from gitfs.events import (
     fetch,
-    syncing,
-    sync_done,
-    writers,
-    shutting_down,
-    remote_operation,
-    push_successful,
     idle,
+    push_successful,
+    remote_operation,
+    shutting_down,
+    sync_done,
+    syncing,
+    writers,
 )
 from gitfs.log import log
+from gitfs.merges import AcceptMine
+from gitfs.worker.peasant import Peasant
 
 
 class SyncWorker(Peasant):
@@ -40,21 +39,21 @@ class SyncWorker(Peasant):
         self,
         author_name,
         author_email,
-        commiter_name,
-        commiter_email,
+        committer_name,
+        committer_email,
         strategy=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
-        super(SyncWorker, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.author = (author_name, author_email)
-        self.commiter = (commiter_name, commiter_email)
+        self.committer = (committer_name, committer_email)
 
         strategy = strategy or AcceptMine(
             self.repository,
             author=self.author,
-            commiter=self.commiter,
+            committer=self.committer,
             repo_path=self.repo_path,
         )
         self.strategy = strategy
@@ -111,7 +110,7 @@ class SyncWorker(Peasant):
             log.debug("Start syncing, first attempt.")
             while not self.sync() and count < 5:
                 fuzz = random.randint(0, 1000) / 1000
-                wait = 2 ** count + fuzz
+                wait = 2**count + fuzz
 
                 log.debug("Failed to sync. Going to sleep for %d seconds", wait)
                 time.sleep(wait)
@@ -180,7 +179,7 @@ class SyncWorker(Peasant):
         if len(jobs) == 1:
             message = jobs[0]["params"]["message"]
         else:
-            updates = set([])
+            updates = set()
             number_of_removal = 0
             number_of_additions = 0
             for job in jobs:
@@ -189,28 +188,28 @@ class SyncWorker(Peasant):
                 number_of_removal += len(removal_set)
                 number_of_additions += len(addition_set)
                 updates = updates | removal_set | addition_set
-            message = "Update {} items. ".format(len(updates))
+            message = f"Update {len(updates)} items. "
             if number_of_additions:
-                message += "Added {} items. ".format(number_of_additions)
+                message += f"Added {number_of_additions} items. "
             if number_of_removal:
-                message += "Removed {} items. ".format(number_of_removal)
+                message += f"Removed {number_of_removal} items. "
             message = message.strip()
 
         old_head = self.repository.head.target
-        new_commit = self.repository.commit(message, self.author, self.commiter)
+        new_commit = self.repository.commit(message, self.author, self.committer)
 
         if new_commit:
             log.debug(
-                "Commit %s with %s as author and %s as commiter",
+                "Commit %s with %s as author and %s as committer",
                 message,
                 self.author,
-                self.commiter,
+                self.committer,
             )
             self.repository.commits.update()
             log.debug("Update commits cache")
         else:
             self.repository.create_reference(
-                "refs/heads/%s" % self.branch, old_head, force=True
+                f"refs/heads/{self.branch}", old_head, force=True
             )
         self.repository.checkout_head(strategy=pygit2.GIT_CHECKOUT_FORCE)
         log.debug("Checkout to HEAD")

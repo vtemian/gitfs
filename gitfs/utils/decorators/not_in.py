@@ -17,12 +17,10 @@ import errno
 import inspect
 from functools import wraps
 
-from six import string_types
-
 from fuse import FuseOSError
 
 
-class not_in(object):
+class not_in:
     def __init__(self, look_at, check=None):
         self.look_at = look_at
         self.check = check
@@ -31,7 +29,7 @@ class not_in(object):
         @wraps(f)
         def decorated(their_self, *args, **kwargs):
             # TODO: check for look_at in self first
-            if isinstance(self.look_at, string_types):
+            if isinstance(self.look_at, str):
                 self.look_at = getattr(their_self, self.look_at)
 
             self.check_args(f, args)
@@ -44,7 +42,7 @@ class not_in(object):
     def check_args(self, f, methods_args):
         to_check = []
 
-        args = inspect.getargspec(f)
+        args = inspect.getfullargspec(f)
         for arg in self.check:
             if arg in args[0]:
                 to_check.append(args[0].index(arg))

@@ -3,7 +3,7 @@ BUILD_DIR:=build
 VIRTUAL_ENV?=$(BUILD_DIR)/virtualenv
 
 TESTS?=tests
-PYTHON?=3.7
+PYTHON?=3.11
 TEST_DIR:=/tmp/gitfs-tests
 MNT_DIR:=$(TEST_DIR)/$(shell bash -c 'echo $$RANDOM')_mnt
 REPO_DIR:=$(TEST_DIR)/$(shell bash -c 'echo $$RANDOM')_repo
@@ -39,26 +39,27 @@ $(BUILD_DIR):
 $(VIRTUAL_ENV)/bin/py.test: $(VIRTUAL_ENV)/bin/pip$(PYTHON)
 	@touch $@
 
-$(VIRTUAL_ENV)/bin/pip2.7:
-	virtualenv --setuptools $(VIRTUAL_ENV)
-
 $(VIRTUAL_ENV)/bin/pip%:
-	virtualenv --setuptools $(VIRTUAL_ENV) -ppython$*
+	python$* -m venv $(VIRTUAL_ENV)
+	$(VIRTUAL_ENV)/bin/pip install --upgrade pip setuptools
 
 virtualenv: $(VIRTUAL_ENV)/bin/pip$(PYTHON)
 
 testenv: virtualenv
 	script/testenv
 
-test: testenv
+test: clean testenv
 	script/test
 
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(TEST_DIR)
 
+format:
+	ruff format gitfs
+
 lint:
-	black -t py27 gitfs
+	ruff format --check gitfs
 
 verify-lint: lint
 	git diff --exit-code
@@ -76,4 +77,4 @@ gh-pages: docs
 	echo -n "(autodoc) " > /tmp/COMMIT_MESSAGE ; git log -1 --pretty=%B >> /tmp/COMMIT_MESSAGE ; echo >> /tmp/COMMIT_MESSAGE ; echo "Commited-By: $$CI_BUILD_URL" >> /tmp/COMMIT_MESSAGE
 	git commit -F /tmp/COMMIT_MESSAGE
 
-.PHONY: clean test testenv virtualenv drone all
+.PHONY: clean test testenv virtualenv all format

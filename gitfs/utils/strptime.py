@@ -16,6 +16,7 @@
 import datetime
 import re
 
+
 MONTHS = [
     "Jan",
     "Feb",
@@ -60,7 +61,7 @@ SPEC = {
 }
 
 
-class TimeParser(object):
+class TimeParser:
     def __init__(self, format):
         # convert strptime format string to regular expression
         format = " ".join(re.split(r"(?:\s|%t|%n)+", format))
@@ -72,7 +73,7 @@ class TimeParser(object):
                     spec = SPEC[spec]
                 pattern.append(spec)
         except KeyError:
-            raise ValueError("unknown specificer:{}".format(spec))
+            raise ValueError(f"unknown specificer:{spec}")
 
         self.pattern = re.compile(r"(?i)" + "".join(pattern))
 

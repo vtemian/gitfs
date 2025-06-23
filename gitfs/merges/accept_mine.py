@@ -14,30 +14,30 @@
 
 
 import pygit2
-import six
 
 from gitfs.log import log
+
 from .base import Merger
 
 
 class AcceptMine(Merger):
     def _create_remote_copy(self, branch_name, upstream, new_branch):
-        reference = "{}/{}".format(upstream, branch_name)
+        reference = f"{upstream}/{branch_name}"
 
         remote = self.repository.branches.remote.get(reference)
-        remote_commit = self.repository[remote.target.hex]
+        remote_commit = self.repository[remote.target]
 
         # TODO: add tests and checks for failures
 
         local = self.repository.create_branch(new_branch, remote_commit)
-        ref = self.repository.lookup_reference("refs/heads/%s" % new_branch)
+        ref = self.repository.lookup_reference(f"refs/heads/{new_branch}")
         self.repository.checkout(ref, strategy=pygit2.GIT_CHECKOUT_FORCE)
 
         return local
 
     def _create_local_copy(self, branch_name, new_branch):
         branch = self.repository.branches.local.get(branch_name)
-        branch_commit = self.repository[branch.target.hex]
+        branch_commit = self.repository[branch.target]
 
         # TODO: add tests and checks for failures
 
@@ -50,27 +50,27 @@ class AcceptMine(Merger):
         log.debug("AcceptMine: Copy remote branch to merging_remote")
         remote = self._create_remote_copy(remote_branch, upstream, "merging_remote")
 
-        log.debug("AcceptMine: Find diverge commis")
+        log.debug("AcceptMine: Find diverge commits")
         diverge_commits = self.repository.find_diverge_commits(local, remote)
 
-        reference = "refs/heads/%s" % "merging_remote"
+        reference = "refs/heads/{}".format("merging_remote")
         log.debug("AcceptMine: Checkout to %s", reference)
         self.repository.checkout(reference, strategy=pygit2.GIT_CHECKOUT_FORCE)
 
         # actual merging
         for commit in diverge_commits.first_commits:
-            log.debug("AcceptMine: Merging %s", commit.hex)
-            self.repository.merge(commit.hex)
+            log.debug("AcceptMine: Merging %s", str(commit.id))
+            self.repository.merge(commit.id)
 
             log.debug("AcceptMine: Solving conflicts")
             self.solve_conflicts(self.repository.index.conflicts)
 
-            log.debug("AcceptMine: Commiting changes")
+            log.debug("AcceptMine: Committing changes")
             ref = self.repository.lookup_reference(reference)
-            message = "merging: %s" % commit.message
+            message = f"merging: {commit.message}"
             parents = [ref.target, commit.id]
             new_commit = self.repository.commit(
-                message, self.author, self.commiter, ref=reference, parents=parents
+                message, self.author, self.committer, ref=reference, parents=parents
             )
             if new_commit is not None:
                 log.debug("AcceptMine: We have a non-empty commit")
@@ -85,13 +85,13 @@ class AcceptMine(Merger):
         log.debug("AcceptMine: Checkout to %s", local_branch)
         ref = self.repository.lookup_reference(reference)
         self.repository.create_reference(
-            "refs/heads/%s" % local_branch, ref.target, force=True
+            f"refs/heads/{local_branch}", ref.target, force=True
         )
 
     def clean_up(self, local_branch):
         log.debug("AcceptMine: Checkout force to branch %s", local_branch)
         self.repository.checkout(
-            "refs/heads/%s" % local_branch, strategy=pygit2.GIT_CHECKOUT_FORCE
+            f"refs/heads/{local_branch}", strategy=pygit2.GIT_CHECKOUT_FORCE
         )
 
         refs = [
@@ -129,10 +129,14 @@ class AcceptMine(Merger):
                     )
                     self.repository.index.add(ours.path)
                 else:
-                    log.debug("AcceptMine: overwrite all file with our " "content")
+                    log.debug("AcceptMine: overwrite all file with our content")
                     with open(self.repository._full_path(ours.path), "w") as f:
                         data = self.repository.get(ours.id).data
-                        f.write(six.text_type(data))
+                        f.write(
+                            data.decode("utf-8")
+                            if isinstance(data, bytes)
+                            else str(data)
+                        )
                     self.repository.index.add(ours.path)
         else:
             log.info("AcceptMine: No conflicts to solve")

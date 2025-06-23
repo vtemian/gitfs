@@ -13,13 +13,14 @@
 # limitations under the License.
 
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from mock import patch, MagicMock
 
 from gitfs.worker.commit_queue import BaseQueue, CommitQueue
 
 
-class TestBaseQueue(object):
+class TestBaseQueue:
     def test_commit(self):
         queue = BaseQueue()
 
@@ -38,7 +39,7 @@ class TestBaseQueue(object):
             mocked_queue.get.assert_called_once_with("args", arg="kwarg")
 
 
-class TestCommitQueue(object):
+class TestCommitQueue:
     def test_add(self):
         mocked_queue = MagicMock()
 

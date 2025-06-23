@@ -14,5 +14,5 @@
 
 
 from .args import Args
-from .strptime import strptime
 from .path import split_path_into_components
+from .strptime import strptime

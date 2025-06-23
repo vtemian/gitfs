@@ -15,6 +15,7 @@
 
 import time
 
+
 try:
     from threading import _Event as Event  # Undocumented py2 class
 except ImportError:
@@ -22,7 +23,7 @@ except ImportError:
 from functools import wraps
 
 
-class while_not(object):
+class while_not:
     def __init__(self, event, wait=0.2):
         self.event = event
         self.wait = wait
@@ -32,12 +33,10 @@ class while_not(object):
         def decorated(obj, *args, **kwargs):
             if not self.event:
                 raise ValueError(
-                    "Except that %s to not be " "None {}".format(obj.__class__.__name__)
+                    f"Except that %s to not be None {obj.__class__.__name__}"
                 )
             if not isinstance(self.event, Event):
-                raise TypeError(
-                    "{} should be of type threading." "Event".format(self.event)
-                )
+                raise TypeError(f"{self.event} should be of type threading.Event")
 
             while self.event.is_set():
                 time.sleep(self.wait)
