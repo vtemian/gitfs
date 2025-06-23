@@ -154,22 +154,33 @@ class TestAcceptMine(object):
             "remote_branch", "upstream", "merging_remote"
         )
         mocked_find_commits.assert_called_once_with("local_copy", "remote_copy")
-        mocked_repo.checkout.assert_has_calls(
-            [call("refs/heads/local_branch", strategy=GIT_CHECKOUT_FORCE)]
-        )
+        mocked_repo.checkout.assert_has_calls([
+            call("refs/heads/merging_remote", strategy=GIT_CHECKOUT_FORCE),  # In merge method
+            call("refs/heads/merging_remote", strategy=GIT_CHECKOUT_FORCE),  # In merge loop
+            call("refs/heads/local_branch", strategy=GIT_CHECKOUT_FORCE)     # In clean_up method
+        ])
         mocked_repo.merge.assert_called_once_with(1)
-        mocked_solve.asssert_called_once_with(mocked_repo.index.conflicts)
+        mocked_solve.assert_called_once_with(mocked_repo.index.conflicts)
 
-        asserted_calls = [
-            call("refs/heads/local_branch"),
-            call("refs/heads/merging_local"),
+        # The actual calls include chained .delete() calls from clean_up method
+        # We need to check the complete call sequence including the chained calls
+        expected_mock_calls = [
+            call("refs/heads/merging_remote"),  # In merge method for commit
+            call("refs/heads/merging_remote"),  # At end of merge method  
+            call("refs/heads/merging_local"),   # In clean_up method
+            call().delete(),                    # Chained .delete() on merging_local ref
+            call("refs/heads/merging_remote"),  # In clean_up method
+            call().delete(),                    # Chained .delete() on merging_remote ref
         ]
-        mocked_repo.lookup_reference.assert_has_calls(asserted_calls)
-        mocked_repo.commit.asserted_called_once_with(
-            "merging: message", "author", "commiter", mocked_ref, ["target", 1]
+        mocked_repo.lookup_reference.assert_has_calls(expected_mock_calls)
+        mocked_repo.commit.assert_called_once_with(
+            "merging: message", "author", "commiter", ref="refs/heads/merging_remote", parents=["target", 1]
         )
-        mocked_repo.create_reference.called_once_with(
-            mocked_ref, "new_commit", force=True
-        )
+        # create_reference is called twice: once for the commit, once to update local branch
+        expected_create_calls = [
+            call("refs/heads/merging_remote", "new_commit", force=True),  # In merge loop
+            call("refs/heads/local_branch", "target", force=True),        # At end of merge method
+        ]
+        mocked_repo.create_reference.assert_has_calls(expected_create_calls)
         assert mocked_repo.state_cleanup.call_count == 1
         assert mocked_ref.delete.call_count == 2
