@@ -45,5 +45,5 @@ class TestReadCurrentView(BaseTest):
             "st_atime": real_stats.st_atime,
         }
 
-        for name, value in items(attrs):
+        for name, value in attrs.items():
             assert getattr(stats, name) == value

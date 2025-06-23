@@ -36,7 +36,7 @@ class TestHistoryView(BaseTest):
 
         attrs = {"st_uid": os.getuid(), "st_gid": os.getgid(), "st_mode": 0o40555}
 
-        for name, value in items(attrs):
+        for name, value in attrs.items():
             assert getattr(stats, name) == value
 
         ctime = self._get_commit_time(0)
@@ -51,7 +51,7 @@ class TestHistoryView(BaseTest):
         stats = os.stat(directory)
 
         attrs = {"st_uid": os.getuid(), "st_gid": os.getgid(), "st_mode": 0o40555}
-        for name, value in items(attrs):
+        for name, value in attrs.items():
             assert getattr(stats, name) == value
 
         st_time = "{} {}".format(self.today, "-".join(commit.split("-")[:-1]))
