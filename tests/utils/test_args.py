@@ -36,10 +36,10 @@ class TestArgs(object):
 
         mocked_file.mkdtemp.return_value = "/tmp"
         mocked_pass.getuser.return_value = "test_user"
-        mocked_os.getgid.return_value = 1
+        mocked_os.getegid.return_value = 1
         mocked_os.environ = {}
         mocked_os.path.abspath.return_value = "abs/tmp"
-        mocked_grp.getgrgid().gr_name = "test_group"
+        mocked_grp.getgrgid.return_value.gr_name = "test_group"
         mocked_parser.parse_args.return_value = mocked_args
         mocked_args.remote_url = url
         mocked_parse_res1.scheme = None
@@ -69,7 +69,7 @@ class TestArgs(object):
                 "repo_path": "abs/tmp",
                 "user": "test_user",
                 "group": "test_group",
-                "branch": "master",
+                "branch": "main",
                 "not_magic": "False",
                 "ssh_user": "user",
             }
