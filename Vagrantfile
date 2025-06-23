@@ -33,6 +33,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.post_up_message = <<-MSG
     GitFS development environment is ready!
     
+    Python 3.11 has been installed from deadsnakes PPA.
+    
     To get started:
       vagrant ssh
       cd /vagrant

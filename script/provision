@@ -9,20 +9,29 @@ function python {
 }
 
 echo "I am provisioning GitFS development environment..."
+echo "Using Python version: $PYTHON_VERSION"
 sudo sh -c 'date > /etc/vagrant_provisioned_at'
 
 echo "Updating package index..."
 sudo apt-get update
 
 echo "Installing system dependencies..."
+# Add deadsnakes PPA for Python 3.11 on Ubuntu 24.04
+echo "Adding deadsnakes PPA for Python 3.11..."
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt-get update
+
+# Install Python 3.11 and dependencies
+echo "Installing Python 3.11 and system packages..."
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q \
     build-essential \
     software-properties-common \
     git \
     curl \
-    "$PYTHON_VERSION" \
-    "$PYTHON_VERSION-dev" \
-    "$PYTHON_VERSION-venv" \
+    python3.11 \
+    python3.11-dev \
+    python3.11-venv \
+    python3.11-distutils \
     python3-pip \
     libffi-dev \
     libgit2-dev \
@@ -42,7 +51,7 @@ python -m venv /home/vagrant/gitfs
 echo "source \$HOME/gitfs/bin/activate" >> "$HOME/.bashrc"
 
 echo "Upgrading pip in virtual environment..."
-/home/vagrant/gitfs/bin/pip install --upgrade pip setuptools wheel
+/home/vagrant/gitfs/bin/python -m pip install --upgrade pip setuptools wheel
 
 echo "Installing cffi..."
 /home/vagrant/gitfs/bin/pip install -q 'cffi>=1.15.1'
