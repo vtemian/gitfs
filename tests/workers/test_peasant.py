@@ -13,12 +13,12 @@
 # limitations under the License.
 
 
-from mock import patch
+from unittest.mock import patch
 
 from gitfs.worker.peasant import Peasant
 
 
-class TestPeasant(object):
+class TestPeasant:
     def test_peasent_init(self):
         with patch("gitfs.worker.peasant.Thread"):
             peasant = Peasant(simple_attribute="value")

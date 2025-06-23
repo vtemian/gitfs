@@ -31,7 +31,7 @@ class Cache(MutableMapping):
         if getsizeof is not None:
             self.getsizeof = getsizeof
 
-        self.__mapping = dict()
+        self.__mapping = {}
         self.__maxsize = maxsize
         self.__currsize = 0
 

@@ -20,7 +20,7 @@ from gitfs.log import log
 
 class Peasant(Thread):
     def __init__(self, *args, **kwargs):
-        super(Peasant, self).__init__()
+        super().__init__()
 
         for name, value in kwargs.items():
             setattr(self, name, value)

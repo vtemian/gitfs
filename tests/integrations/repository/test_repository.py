@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from tests.integrations.base import BaseTest, gitfs_log
+from tests.integrations.base import BaseTest
 
 
 class TestRepository(BaseTest):
@@ -23,11 +23,7 @@ class TestRepository(BaseTest):
             self.sh.git.push("origin", "main")
 
         assert os.path.exists(
-            "{}/history/{}/{}".format(
-                self.mount_path,
-                self.get_commit_dates()[0],
-                self.get_commits_by_date()[0],
-            )
+            f"{self.mount_path}/history/{self.get_commit_dates()[0]}/{self.get_commits_by_date()[0]}"
         )
         assert oct(os.stat(self.current_path + "/" + file_name).st_mode & 0o755) == oct(
             0o755
@@ -45,12 +41,7 @@ class TestRepository(BaseTest):
 
         assert os.path.exists(self.current_path + "/" + file_name)
         assert os.path.exists(
-            "%s/history/%s/%s"
-            % (
-                self.mount_path,
-                self.get_commit_dates()[0],
-                self.get_commits_by_date()[0],
-            )
+            f"{self.mount_path}/history/{self.get_commit_dates()[0]}/{self.get_commits_by_date()[0]}"
         )
 
     def test_edit_file(self, gitfs_log):
@@ -76,12 +67,7 @@ class TestRepository(BaseTest):
 
         assert os.path.exists(self.current_path + "/" + file_name)
         assert os.path.exists(
-            "%s/history/%s/%s"
-            % (
-                self.mount_path,
-                self.get_commit_dates()[0],
-                self.get_commits_by_date()[0],
-            )
+            f"{self.mount_path}/history/{self.get_commit_dates()[0]}/{self.get_commits_by_date()[0]}"
         )
 
     def test_delete_content(self):
@@ -102,12 +88,7 @@ class TestRepository(BaseTest):
 
         assert os.path.exists(self.current_path + "/" + file_name)
         assert os.path.exists(
-            "%s/history/%s/%s"
-            % (
-                self.mount_path,
-                self.get_commit_dates()[0],
-                self.get_commits_by_date()[0],
-            )
+            f"{self.mount_path}/history/{self.get_commit_dates()[0]}/{self.get_commits_by_date()[0]}"
         )
 
     def test_delete_file(self, gitfs_log):
@@ -129,10 +110,5 @@ class TestRepository(BaseTest):
 
         assert not os.path.exists(self.current_path + "/" + file_name)
         assert os.path.exists(
-            "%s/history/%s/%s"
-            % (
-                self.mount_path,
-                self.get_commit_dates()[0],
-                self.get_commits_by_date()[0],
-            )
+            f"{self.mount_path}/history/{self.get_commit_dates()[0]}/{self.get_commits_by_date()[0]}"
         )

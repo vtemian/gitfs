@@ -15,25 +15,24 @@
 
 import os
 
-
 from tests.integrations.base import BaseTest
 
 
 class TestReadCurrentView(BaseTest):
     def test_listdirs(self):
         dirs = set(os.listdir(self.current_path))
-        assert dirs == set(["testing", "me"])
+        assert dirs == {"testing", "me"}
 
     def test_read_from_a_file(self):
-        with open("{}/testing".format(self.current_path)) as f:
+        with open(f"{self.current_path}/testing") as f:
             content = f.read()
             assert content == "just testing around here\n"
 
     def test_get_correct_stats(self):
-        filename = "{}/testing".format(self.current_path)
+        filename = f"{self.current_path}/testing"
         stats = os.stat(filename)
 
-        filename = "{}/testing".format(self.repo_path)
+        filename = f"{self.repo_path}/testing"
         real_stats = os.stat(filename)
 
         attrs = {

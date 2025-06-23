@@ -13,17 +13,17 @@
 # limitations under the License.
 
 
-from contextlib import contextmanager
-from datetime import datetime
 import collections
 import os
 import subprocess
 import time
+from contextlib import contextmanager
+from datetime import datetime
 
 import pytest
 
 
-class Sh(object):
+class Sh:
     def __init__(self, cwd=None):
         self.command = ""
         self.cwd = cwd
@@ -44,7 +44,7 @@ class Sh(object):
         )
 
 
-class pull(object):
+class pull:
     def __init__(self, sh):
         self.sh = sh
 
@@ -55,14 +55,14 @@ class pull(object):
         pass
 
 
-class BaseTest(object):
+class BaseTest:
     def setup_method(self):
         self.mount_path = "{}".format(os.environ["MOUNT_PATH"])
 
         self.repo_name = os.environ["REPO_NAME"]
         self.repo_path = os.environ["REPO_PATH"]
 
-        self.current_path = "%s/current" % self.mount_path
+        self.current_path = f"{self.mount_path}/current"
 
         self.remote_repo_path = os.environ["REMOTE"]
         self.sh = Sh(self.remote_repo_path)
@@ -86,20 +86,15 @@ class BaseTest(object):
 
         lines = self.sh.git.log(
             "--before",
-            '"%s 23:59:59"' % date,
+            f'"{date} 23:59:59"',
             "--after",
-            '"%s 00:00:00"' % date,
+            f'"{date} 00:00:00"',
             '--pretty="%ai %H"',
         ).splitlines()
 
-        lines = map(lambda line: line.split(), lines)
+        lines = (line.split() for line in lines)
 
-        return list(
-            map(
-                lambda tokens: "%s-%s" % (tokens[1].replace(":", "-"), tokens[3][:10]),
-                lines,
-            )
-        )
+        return ["{}-{}".format(tokens[1].replace(":", "-"), tokens[3][:10]) for tokens in lines]
 
     def get_commit_dates(self):
         return list(set(self.sh.git.log("--pretty=%ad", "--date=short").splitlines()))
@@ -122,7 +117,7 @@ class BaseTest(object):
             assert f.read() == content
 
 
-class GitFSLog(object):
+class GitFSLog:
     def __init__(self, file_descriptor):
         self._partial_line = None
         self.line_buffer = collections.deque()
@@ -198,7 +193,7 @@ class GitFSLog(object):
                 return
             elapsed = time.time() - started
         raise AssertionError(
-            "Timed out waiting for '{}' in the stream".format(expected)
+            f"Timed out waiting for '{expected}' in the stream"
         )
 
     def expect_multiple(self, expected, *args, **kwargs):

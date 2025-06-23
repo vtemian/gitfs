@@ -13,19 +13,18 @@
 # limitations under the License.
 
 import sys
-from mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
+
+from gitfs.mounter import get_credentials, parse_args, prepare_components, start_fuse
 
 
-from gitfs.mounter import prepare_components, parse_args, start_fuse, get_credentials
-
-
-class EmptyObject(object):
+class EmptyObject:
     def __init__(self, **kwargs):
         for name, value in kwargs.items():
             setattr(self, name, value)
 
 
-class TestMount(object):
+class TestMount:
     def test_prepare_components(self):
         mocked_argparse = MagicMock()
         mocked_parser = MagicMock()
@@ -61,8 +60,8 @@ class TestMount(object):
                 "upstream": "origin",
                 "fetch_timeout": 10,
                 "merge_timeout": 10,
-                "commiter_name": "commit",
-                "commiter_email": "commiter@commiting.org",
+                "committer_name": "commit",
+                "committer_email": "committer@commiting.org",
                 "log": "syslog",
                 "ignore_file": "",
                 "module_file": "",
@@ -114,9 +113,9 @@ class TestMount(object):
             }
             mocked_merger.assert_called_once_with(
                 "commit",
-                "commiter@commiting.org",
+                "committer@commiting.org",
                 "commit",
-                "commiter@commiting.org",
+                "committer@commiting.org",
                 **asserted_call
             )
 
@@ -146,7 +145,7 @@ class TestMount(object):
         mocked_prepare = MagicMock()
         mocked_argp = MagicMock()
         mocked_fuse = MagicMock()
-        mocked_resource = MagicMock()
+        MagicMock()
         mocked_args = MagicMock()
 
         mocked_merge = MagicMock()

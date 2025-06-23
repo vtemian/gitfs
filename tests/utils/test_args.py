@@ -13,13 +13,12 @@
 # limitations under the License.
 
 
-from mock import MagicMock, patch, call
-
+from unittest.mock import MagicMock, call, patch
 
 from gitfs.utils.args import Args
 
 
-class TestArgs(object):
+class TestArgs:
     def test_args(self):
         mocked_os = MagicMock()
         mocked_log = MagicMock()

@@ -16,7 +16,6 @@
 import os
 from datetime import datetime
 
-
 from tests.integrations.base import BaseTest
 
 
@@ -24,7 +23,7 @@ class TestReadCommitView(BaseTest):
     def test_listdirs(self):
         commits = self.get_commits_by_date()
         files = os.listdir(
-            "{}/history/{}/{}".format(self.mount_path, self.today, commits[-1])
+            f"{self.mount_path}/history/{self.today}/{commits[-1]}"
         )
 
         real_files = os.listdir(self.repo_path)
@@ -33,8 +32,8 @@ class TestReadCommitView(BaseTest):
 
     def test_stats(self):
         commit = self.get_commits_by_date()[0]
-        directory = "{}/history/{}/{}".format(self.mount_path, self.today, commit)
-        filename = "{}/testing".format(directory)
+        directory = f"{self.mount_path}/history/{self.today}/{commit}"
+        filename = f"{directory}/testing"
 
         stats = os.stat(filename)
 

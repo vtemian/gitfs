@@ -15,8 +15,8 @@
 
 import pytest
 
-from gitfs.cache.lru import LRUCache
 from gitfs.cache.decorators import lru_wrapper
+from gitfs.cache.lru import LRUCache
 
 
 @lru_wrapper(maxsize=2)
@@ -29,7 +29,7 @@ def cached_typed(n):
     return n
 
 
-class TestLRUCache(object):
+class TestLRUCache:
     def test_insert(self):
         lru = LRUCache(2)
 

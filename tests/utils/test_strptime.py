@@ -13,16 +13,16 @@
 # limitations under the License.
 
 
-import pytest
 import datetime as dt
+from unittest.mock import MagicMock
 
-from mock import MagicMock
+import pytest
 
-from gitfs.utils.strptime import TimeParser
 from gitfs.utils import strptime
+from gitfs.utils.strptime import TimeParser
 
 
-class TestDateTimeUtils(object):
+class TestDateTimeUtils:
     def test_strptime(self):
         date = dt.date(2014, 8, 21)
         datetime = dt.datetime(2014, 8, 21, 1, 2, 3)

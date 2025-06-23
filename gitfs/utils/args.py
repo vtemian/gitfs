@@ -44,8 +44,8 @@ class Args:
                 ("branch", ("main", "string")),
                 ("allow_other", (False, "bool")),
                 ("allow_root", (True, "bool")),
-                ("commiter_name", (self.get_commiter_user, "string")),
-                ("commiter_email", (self.get_commiter_email, "string")),
+                ("committer_name", (self.get_committer_user, "string")),
+                ("committer_email", (self.get_committer_email, "string")),
                 ("max_size", (10, "float")),
                 ("fetch_timeout", (30, "float")),
                 ("idle_fetch_timeout", (30 * 60, "float")),  # 30 min
@@ -177,10 +177,10 @@ class Args:
     def get_current_user(self, args):
         return getpass.getuser()
 
-    def get_commiter_user(self, args):
+    def get_committer_user(self, args):
         return args.user
 
-    def get_commiter_email(self, args):
+    def get_committer_email(self, args):
         return f"{args.user}@{socket.gethostname()}"
 
     def get_repo_path(self, args):

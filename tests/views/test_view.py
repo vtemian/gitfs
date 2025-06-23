@@ -20,7 +20,7 @@ class SimpleView(View):
     pass
 
 
-class TestView(object):
+class TestView:
     def test_get_attr(self):
         simple_view = SimpleView(**{"uid": 1, "gid": 1, "mount_time": "now"})
 

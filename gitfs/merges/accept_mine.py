@@ -30,7 +30,7 @@ class AcceptMine(Merger):
         # TODO: add tests and checks for failures
 
         local = self.repository.create_branch(new_branch, remote_commit)
-        ref = self.repository.lookup_reference("refs/heads/%s" % new_branch)
+        ref = self.repository.lookup_reference(f"refs/heads/{new_branch}")
         self.repository.checkout(ref, strategy=pygit2.GIT_CHECKOUT_FORCE)
 
         return local
@@ -50,10 +50,10 @@ class AcceptMine(Merger):
         log.debug("AcceptMine: Copy remote branch to merging_remote")
         remote = self._create_remote_copy(remote_branch, upstream, "merging_remote")
 
-        log.debug("AcceptMine: Find diverge commis")
+        log.debug("AcceptMine: Find diverge commits")
         diverge_commits = self.repository.find_diverge_commits(local, remote)
 
-        reference = "refs/heads/%s" % "merging_remote"
+        reference = "refs/heads/{}".format("merging_remote")
         log.debug("AcceptMine: Checkout to %s", reference)
         self.repository.checkout(reference, strategy=pygit2.GIT_CHECKOUT_FORCE)
 
@@ -65,12 +65,12 @@ class AcceptMine(Merger):
             log.debug("AcceptMine: Solving conflicts")
             self.solve_conflicts(self.repository.index.conflicts)
 
-            log.debug("AcceptMine: Commiting changes")
+            log.debug("AcceptMine: Committing changes")
             ref = self.repository.lookup_reference(reference)
-            message = "merging: %s" % commit.message
+            message = f"merging: {commit.message}"
             parents = [ref.target, commit.id]
             new_commit = self.repository.commit(
-                message, self.author, self.commiter, ref=reference, parents=parents
+                message, self.author, self.committer, ref=reference, parents=parents
             )
             if new_commit is not None:
                 log.debug("AcceptMine: We have a non-empty commit")
@@ -85,13 +85,13 @@ class AcceptMine(Merger):
         log.debug("AcceptMine: Checkout to %s", local_branch)
         ref = self.repository.lookup_reference(reference)
         self.repository.create_reference(
-            "refs/heads/%s" % local_branch, ref.target, force=True
+            f"refs/heads/{local_branch}", ref.target, force=True
         )
 
     def clean_up(self, local_branch):
         log.debug("AcceptMine: Checkout force to branch %s", local_branch)
         self.repository.checkout(
-            "refs/heads/%s" % local_branch, strategy=pygit2.GIT_CHECKOUT_FORCE
+            f"refs/heads/{local_branch}", strategy=pygit2.GIT_CHECKOUT_FORCE
         )
 
         refs = [

@@ -11,16 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from mock import MagicMock, patch, call
 from queue import Empty
+from unittest.mock import MagicMock, call, patch
+
 import pygit2
-from pygit2 import GitError
 import pytest
+from pygit2 import GitError
 
 from gitfs.worker.sync import SyncWorker
 
 
-class TestSyncWorker(object):
+class TestSyncWorker:
     def test_work(self):
         mocked_queue = MagicMock()
         mocked_idle = MagicMock(side_effect=ValueError)

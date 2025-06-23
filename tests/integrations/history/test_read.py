@@ -16,22 +16,21 @@
 import os
 from datetime import datetime
 
-
 from tests.integrations.base import BaseTest
 
 
 class TestHistoryView(BaseTest):
     def test_listdirs(self):
-        directory = os.listdir("{}/history/".format(self.mount_path))
+        directory = os.listdir(f"{self.mount_path}/history/")
         assert directory == self.get_commit_dates()
 
     def test_listdirs_with_commits(self):
         commits = self.get_commits_by_date(self.today)[::-1]
-        directory = os.listdir("{}/history/{}".format(self.mount_path, self.today))
+        directory = os.listdir(f"{self.mount_path}/history/{self.today}")
         assert sorted(directory) == sorted(commits)
 
     def test_stats(self):
-        directory = "{}/history/{}".format(self.mount_path, self.today)
+        directory = f"{self.mount_path}/history/{self.today}"
         stats = os.stat(directory)
 
         attrs = {"st_uid": os.getuid(), "st_gid": os.getgid(), "st_mode": 0o40555}
@@ -47,7 +46,7 @@ class TestHistoryView(BaseTest):
 
     def test_stats_with_commits(self):
         commit = self.get_commits_by_date(self.today)[0]
-        directory = "{}/history/{}/{}".format(self.mount_path, self.today, commit)
+        directory = f"{self.mount_path}/history/{self.today}/{commit}"
         stats = os.stat(directory)
 
         attrs = {"st_uid": os.getuid(), "st_gid": os.getgid(), "st_mode": 0o40555}

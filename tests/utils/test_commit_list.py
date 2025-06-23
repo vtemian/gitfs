@@ -13,12 +13,12 @@
 # limitations under the License.
 
 
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from gitfs.utils.commits import CommitsList
 
 
-class TestCommitList(object):
+class TestCommitList:
     def test_contains(self):
         mocked_commit = MagicMock()
         mocked_commit.id = "hexish"

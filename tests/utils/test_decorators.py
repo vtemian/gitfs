@@ -14,16 +14,15 @@
 
 
 from threading import Event
+from unittest.mock import MagicMock, call, patch
 
 import pytest
-from mock import MagicMock, patch, call
-
 
 from gitfs.utils.decorators.retry import retry
 from gitfs.utils.decorators.while_not import while_not
 
 
-class MockedWraps(object):
+class MockedWraps:
     def __init__(self, f):
         self.f = f
 
@@ -34,13 +33,13 @@ class MockedWraps(object):
         return decorated
 
 
-class EmptyMock(object):
+class EmptyMock:
     def __init__(self, **kwargs):
         for name, value in kwargs.items():
             setattr(self, name, value)
 
 
-class TestRetryDecorator(object):
+class TestRetryDecorator:
     def test_retry(self):
         mocked_time = MagicMock()
         mocked_method = MagicMock(side_effect=ValueError)
@@ -57,7 +56,7 @@ class TestRetryDecorator(object):
             mocked_method.assert_has_calls([call("arg", kwarg="kwarg")])
 
 
-class TestWhileNotDecorator(object):
+class TestWhileNotDecorator:
     def test_while_not_with_invalid_event_type(self):
         mocked_method = MagicMock()
         mocked_self = EmptyMock(obj="obj")

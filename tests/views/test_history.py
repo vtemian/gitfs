@@ -14,16 +14,15 @@
 
 
 from stat import S_IFDIR
+from unittest.mock import MagicMock, patch
 
 import pytest
-from mock import patch, MagicMock
-
 from fuse import FuseOSError
 
 from gitfs.views.history import HistoryView
 
 
-class TestHistory(object):
+class TestHistory:
     def test_getattr_with_correct_path(self):
         mocked_repo = MagicMock()
         mocked_first = MagicMock()
@@ -96,7 +95,7 @@ class TestHistory(object):
         history = HistoryView(repo=mocked_repo)
 
         asserted_dirs = [".", "..", "tomorrow"]
-        dirs = [entry for entry in history.readdir("path", 0)]
+        dirs = list(history.readdir("path", 0))
         assert dirs == asserted_dirs
         assert mocked_repo.get_commit_dates.call_count == 1
 
@@ -108,7 +107,7 @@ class TestHistory(object):
         history.date = "now"
 
         asserted_dirs = [".", "..", "tomorrow"]
-        dirs = [entry for entry in history.readdir("path", 0)]
+        dirs = list(history.readdir("path", 0))
         assert dirs == asserted_dirs
         mocked_repo.get_commits_by_date.assert_called_once_with("now")
 

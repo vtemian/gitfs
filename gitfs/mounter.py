@@ -18,7 +18,7 @@ import resource
 import sys
 
 from fuse import FUSE
-from pygit2 import Keypair, UserPass, RemoteCallbacks
+from pygit2 import Keypair, RemoteCallbacks, UserPass
 
 from gitfs import __version__
 from gitfs.router import Router
@@ -76,8 +76,7 @@ def prepare_components(args):
         )
     except KeyError as error:
         sys.stderr.write(
-            "Can't clone reference origin/%s from remote %s: %s\n"
-            % (args.branch, args.remote_url, error)
+            f"Can't clone reference origin/{args.branch} from remote {args.remote_url}: {error}\n"
         )
         raise error
 
@@ -87,10 +86,10 @@ def prepare_components(args):
 
     # setup workers
     merge_worker = SyncWorker(
-        args.commiter_name,
-        args.commiter_email,
-        args.commiter_name,
-        args.commiter_email,
+        args.committer_name,
+        args.committer_email,
+        args.committer_name,
+        args.committer_email,
         commit_queue=commit_queue,
         repository=router.repo,
         upstream="origin",

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class RepositoryBaseTest(object):
+class RepositoryBaseTest:
     def setup_method(self):
         self.remote_url = "https://example.com"
         self.branch = "master"

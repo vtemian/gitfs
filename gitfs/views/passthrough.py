@@ -49,7 +49,7 @@ FS_STATS = (
 
 class PassthroughView(View):
     def __init__(self, *args, **kwargs):
-        super(PassthroughView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.repo = kwargs["repo"]
         self.root = kwargs["repo_path"]
 
@@ -75,7 +75,7 @@ class PassthroughView(View):
     def getattr(self, path, fh=None):
         full_path = self.repo._full_path(path)
         status = os.lstat(full_path)
-        return dict((key, getattr(status, key)) for key in STATS)
+        return {key: getattr(status, key) for key in STATS}
 
     def readdir(self, path, fh):
         full_path = self.repo._full_path(path)
@@ -90,8 +90,7 @@ class PassthroughView(View):
         if self.is_current_path_root:
             dirents.append(self.history_path)
 
-        for directory in dirents:
-            yield directory
+        yield from dirents
 
     def readlink(self, path):
         pathname = os.readlink(self.repo._full_path(path))
@@ -112,7 +111,7 @@ class PassthroughView(View):
     def statfs(self, path):
         full_path = self.repo._full_path(path)
         stv = os.statvfs(full_path)
-        return dict((key, getattr(stv, key)) for key in FS_STATS)
+        return {key: getattr(stv, key) for key in FS_STATS}
 
     def unlink(self, path):
         return os.unlink(self.repo._full_path(path))

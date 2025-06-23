@@ -16,7 +16,7 @@
 from gitfs.cache.node import Node
 
 
-class TestNode(object):
+class TestNode:
     def test_node(self):
         node = Node()
 

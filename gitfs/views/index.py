@@ -43,7 +43,7 @@ class IndexView(ReadOnlyView):
         if path != "/":
             raise FuseOSError(ENOENT)
 
-        attrs = super(IndexView, self).getattr(path, fh)
+        attrs = super().getattr(path, fh)
         attrs.update({"st_mode": S_IFDIR | 0o555, "st_nlink": 2})
 
         return attrs

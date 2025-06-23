@@ -15,16 +15,16 @@
 
 import os
 from threading import Event
+from unittest.mock import MagicMock, call, patch
 
 import pytest
-from mock import patch, MagicMock, call
-
 from fuse import FuseOSError
-from gitfs.views.current import CurrentView
+
 from gitfs.cache.gitignore import CachedIgnore
+from gitfs.views.current import CurrentView
 
 
-class TestCurrentView(object):
+class TestCurrentView:
     def test_rename(self):
         mocked_re = MagicMock()
         mocked_index = MagicMock()
@@ -168,7 +168,8 @@ class TestCurrentView(object):
     def test_write(self):
         from gitfs.views import current as current_view
 
-        mocked_write = lambda self, path, buf, offste, fh: "done"
+        def mocked_write(self, path, buf, offste, fh):
+            return "done"
         old_write = current_view.PassthroughView.write
         current_view.PassthroughView.write = mocked_write
 
@@ -193,7 +194,8 @@ class TestCurrentView(object):
 
         old_mkdir = current_view.PassthroughView.mkdir
         old_chmod = current_view.PassthroughView.chmod
-        mocked_mkdir = lambda self, path, mode: "done"
+        def mocked_mkdir(self, path, mode):
+            return "done"
 
         mocked_chmod = MagicMock()
         mocked_chmod.return_value = None
@@ -258,7 +260,8 @@ class TestCurrentView(object):
         from gitfs.views import current as current_view
 
         old_chmod = current_view.PassthroughView.chmod
-        mock_chmod = lambda self, path, mode: "done"
+        def mock_chmod(self, path, mode):
+            return "done"
         current_view.PassthroughView.chmod = mock_chmod
 
         mocked_open = MagicMock()
@@ -296,7 +299,7 @@ class TestCurrentView(object):
         current._stage = mocked_index
 
         assert current.chmod("/path", 0o100644) == "done"
-        message = "Chmod to 0%o on %s" % (0o644, "/path")
+        message = "Chmod to 0{:o} on {}".format(0o644, "/path")
         mocked_index.assert_called_once_with(add="/path", message=message)
 
         current_view.PassthroughView.chmod = old_chmod
@@ -422,7 +425,7 @@ class TestCurrentView(object):
             )
 
             current._full_path = mocked_full
-            current.writing = set([])
+            current.writing = set()
 
             assert current.open("path/", os.O_WRONLY) == 1
             mocked_os.open.assert_called_once_with("full_path", os.O_WRONLY)

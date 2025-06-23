@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 
+import pytest
 from fuse import FuseOSError
 
-from gitfs.views import CurrentView
 from gitfs.router import Router
+from gitfs.views import CurrentView
 
 
-class TestRouter(object):
+class TestRouter:
     def get_new_router(self):
         mocked_credentials = MagicMock()
         mocked_branch = MagicMock()

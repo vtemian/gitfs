@@ -139,10 +139,10 @@ class Router:
             view, relative_path = self.get_view(path)
             args = (relative_path,) + args[1:]
 
-        log.debug("Call %s %s with %r" % (operation, view.__class__.__name__, args))
+        log.debug(f"Call {operation} {view.__class__.__name__} with {args!r}")
 
         if not hasattr(view, operation):
-            log.debug("No attribute %s on %s" % (operation, view.__class__.__name__))
+            log.debug(f"No attribute {operation} on {view.__class__.__name__}")
             raise FuseOSError(ENOSYS)
 
         idle.clear()
@@ -218,6 +218,6 @@ class Router:
         """
 
         methods = inspect.getmembers(FUSE, predicate=callable)
-        fuse_allowed_methods = set(elem[0] for elem in methods)
+        fuse_allowed_methods = {elem[0] for elem in methods}
 
-        return attr_name in fuse_allowed_methods - set(["bmap", "lock"])
+        return attr_name in fuse_allowed_methods - {"bmap", "lock"}

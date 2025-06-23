@@ -140,7 +140,7 @@ class Repository:
         """
 
         remote = self.get_remote(upstream)
-        remote.push(["refs/heads/%s" % branch], callbacks=credentials)
+        remote.push([f"refs/heads/{branch}"], callbacks=credentials)
 
     def fetch(self, upstream, branch_name, credentials):
         """
@@ -154,7 +154,7 @@ class Repository:
         self.behind = behind
         return behind
 
-    def commit(self, message, author, commiter, parents=None, ref="HEAD"):
+    def commit(self, message, author, committer, parents=None, ref="HEAD"):
         """Wrapper for create_commit. It creates a commit from a given ref
         (default is HEAD)
         """
@@ -165,7 +165,7 @@ class Repository:
 
         # sign the author
         author = Signature(author[0], author[1])
-        commiter = Signature(commiter[0], commiter[1])
+        committer = Signature(committer[0], committer[1])
 
         # write index localy
         tree = self._repo.index.write_tree()
@@ -175,7 +175,7 @@ class Repository:
         if parents is None:
             parents = [self._repo.revparse_single(ref).id]
 
-        return self._repo.create_commit(ref, author, commiter, message, tree, parents)
+        return self._repo.create_commit(ref, author, committer, message, tree, parents)
 
     @classmethod
     def clone(cls, remote_url, path, branch=None, credentials=None):
@@ -196,7 +196,7 @@ class Repository:
             remote_url, path, checkout_branch=branch, callbacks=credentials
         )
         # except Exception:
-            # log.error("Error on cloning the repository: ", exc_info=True)
+        # log.error("Error on cloning the repository: ", exc_info=True)
 
         repo.checkout_head()
         return cls(repo)
@@ -416,7 +416,7 @@ class Repository:
                 yield (commit for commit in commits)
 
     def remote_head(self, upstream, branch):
-        ref = "%s/%s" % (upstream, branch)
+        ref = f"{upstream}/{branch}"
         remote = self._repo.lookup_branch(ref, GIT_BRANCH_REMOTE)
         return remote.get_object()
 

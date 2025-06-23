@@ -16,18 +16,20 @@
 import time
 from collections import namedtuple
 from stat import S_IFDIR, S_IFREG
+from unittest.mock import ANY, MagicMock, call, patch
 
 import pytest
-from mock import MagicMock, patch, call, ANY
 from pygit2 import (
     GIT_BRANCH_REMOTE,
-    GIT_SORT_TIME,
     GIT_FILEMODE_BLOB,
+    GIT_SORT_TIME,
     GIT_STATUS_CURRENT,
 )
 
 from gitfs.repository import Repository
+
 from .base import RepositoryBaseTest
+
 
 Commit = namedtuple("Commit", "id")
 
@@ -47,7 +49,7 @@ class TestRepository(RepositoryBaseTest):
         )
 
     def test_fetch(self):
-        class MockedCommit(object):
+        class MockedCommit:
             @property
             def id(self):
                 time.sleep(0.1)
@@ -78,20 +80,20 @@ class TestRepository(RepositoryBaseTest):
         mocked_repo.create_commit.return_value = "commit"
 
         author = ("author_1", "author_2")
-        commiter = ("commiter_1", "commiter_2")
+        committer = ("committer_1", "committer_2")
 
         with patch("gitfs.repository.Signature") as mocked_signature:
             mocked_signature.return_value = "signature"
 
             repo = Repository(mocked_repo)
-            commit = repo.commit("message", author, commiter)
+            commit = repo.commit("message", author, committer)
 
             assert commit == "commit"
             assert mocked_repo.status.call_count == 1
             assert mocked_repo.index.write_tree.call_count == 1
             assert mocked_repo.index.write.call_count == 1
 
-            mocked_signature.assert_has_calls([call(*author), call(*commiter)])
+            mocked_signature.assert_has_calls([call(*author), call(*committer)])
             mocked_repo.revparse_single.assert_called_once_with("HEAD")
             mocked_repo.create_commit.assert_called_once_with(
                 "HEAD", "signature", "signature", "message", "tree", [1]
@@ -102,10 +104,10 @@ class TestRepository(RepositoryBaseTest):
         mocked_repo.status.return_value = {}
 
         author = ("author_1", "author_2")
-        commiter = ("commiter_1", "commiter_2")
+        committer = ("committer_1", "committer_2")
 
         repo = Repository(mocked_repo)
-        commit = repo.commit("message", author, commiter)
+        commit = repo.commit("message", author, committer)
 
         assert commit is None
 
@@ -140,7 +142,7 @@ class TestRepository(RepositoryBaseTest):
         assert repo.remote_head(upstream, branch) == "simple_remote"
         assert mocked_remote.get_object.call_count == 1
 
-        ref = "{}/{}".format(upstream, branch)
+        ref = f"{upstream}/{branch}"
         mocked_repo.lookup_branch.assert_called_once_with(ref, GIT_BRANCH_REMOTE)
 
     def test_get_remote(self):
@@ -178,7 +180,7 @@ class TestRepository(RepositoryBaseTest):
              (commit_n_branch_1, commit_n_branch_2)]
         """
 
-        class BranchWalker(object):
+        class BranchWalker:
             commit_number = 1
 
             def __init__(self, step=1, max_commit_number=10):

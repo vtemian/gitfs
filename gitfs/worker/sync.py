@@ -39,21 +39,21 @@ class SyncWorker(Peasant):
         self,
         author_name,
         author_email,
-        commiter_name,
-        commiter_email,
+        committer_name,
+        committer_email,
         strategy=None,
         *args,
         **kwargs,
     ):
-        super(SyncWorker, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.author = (author_name, author_email)
-        self.commiter = (commiter_name, commiter_email)
+        self.committer = (committer_name, committer_email)
 
         strategy = strategy or AcceptMine(
             self.repository,
             author=self.author,
-            commiter=self.commiter,
+            committer=self.committer,
             repo_path=self.repo_path,
         )
         self.strategy = strategy
@@ -179,7 +179,7 @@ class SyncWorker(Peasant):
         if len(jobs) == 1:
             message = jobs[0]["params"]["message"]
         else:
-            updates = set([])
+            updates = set()
             number_of_removal = 0
             number_of_additions = 0
             for job in jobs:
@@ -196,20 +196,20 @@ class SyncWorker(Peasant):
             message = message.strip()
 
         old_head = self.repository.head.target
-        new_commit = self.repository.commit(message, self.author, self.commiter)
+        new_commit = self.repository.commit(message, self.author, self.committer)
 
         if new_commit:
             log.debug(
-                "Commit %s with %s as author and %s as commiter",
+                "Commit %s with %s as author and %s as committer",
                 message,
                 self.author,
-                self.commiter,
+                self.committer,
             )
             self.repository.commits.update()
             log.debug("Update commits cache")
         else:
             self.repository.create_reference(
-                "refs/heads/%s" % self.branch, old_head, force=True
+                f"refs/heads/{self.branch}", old_head, force=True
             )
         self.repository.checkout_head(strategy=pygit2.GIT_CHECKOUT_FORCE)
         log.debug("Checkout to HEAD")

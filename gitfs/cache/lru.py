@@ -44,7 +44,7 @@ class LRUCache(Cache):
         self.__lock = RLock()
 
     def __getitem__(self, key):
-        value, link = super(LRUCache, self).__getitem__(key)
+        value, link = super().__getitem__(key)
         root = self.__root
         link.prev.next = link.next
         link.next.prev = link.prev
@@ -56,11 +56,11 @@ class LRUCache(Cache):
     def __setitem__(self, key, value):
         with self.__lock:
             try:
-                _, link = super(LRUCache, self).__getitem__(key)
+                _, link = super().__getitem__(key)
             except KeyError:
                 link = Node()
 
-            super(LRUCache, self).__setitem__(key, (value, link))
+            super().__setitem__(key, (value, link))
 
             try:
                 link.prev.next = link.next
@@ -75,8 +75,8 @@ class LRUCache(Cache):
 
     def __delitem__(self, key):
         with self.__lock:
-            _, link = super(LRUCache, self).__getitem__(key)
-            super(LRUCache, self).__delitem__(key)
+            _, link = super().__getitem__(key)
+            super().__delitem__(key)
 
             link.prev.next = link.next
             link.next.prev = link.prev
@@ -107,7 +107,7 @@ class LRUCache(Cache):
 
     def get_if_exists(self, key):
         with self.__lock:
-            exists = super(LRUCache, self).__contains__(key)
+            exists = super().__contains__(key)
             if not exists:
                 return None
 

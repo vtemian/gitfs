@@ -13,14 +13,16 @@
 # limitations under the License.
 
 
-from fuse import FuseOSError
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
+
 import pytest
+from fuse import FuseOSError
+
 from gitfs.cache import CachedIgnore
 from gitfs.utils.decorators.not_in import not_in
 
 
-class TestNotIn(object):
+class TestNotIn:
     def test_decorator(self):
         mocked_function = MagicMock()
         mocked_function.__name__ = "function"

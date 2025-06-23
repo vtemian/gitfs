@@ -1,5 +1,7 @@
+from setuptools import find_packages, setup
+
 from gitfs import __version__
-from setuptools import setup, find_packages
+
 
 REQUIREMENTS = [line.strip() for line in open("requirements.txt").readlines()]
 

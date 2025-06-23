@@ -15,10 +15,9 @@
 
 from collections import namedtuple
 from io import TextIOWrapper
+from unittest.mock import MagicMock, call, patch
 
-from mock import MagicMock, patch, call
-
-from pygit2 import GIT_BRANCH_LOCAL, GIT_BRANCH_REMOTE, GIT_CHECKOUT_FORCE
+from pygit2 import GIT_CHECKOUT_FORCE
 
 from gitfs.merges.accept_mine import AcceptMine
 
@@ -26,7 +25,7 @@ from gitfs.merges.accept_mine import AcceptMine
 Commit = namedtuple("Commit", ["hex", "message", "id"])
 
 
-class TestAcceptMine(object):
+class TestAcceptMine:
     def test_create_local_copy(self):
         mocked_repo = MagicMock()
         mocked_branch = MagicMock()
@@ -140,7 +139,7 @@ class TestAcceptMine(object):
         mocked_copy.return_value = "local_copy"
         mocked_remote_copy.return_value = "remote_copy"
 
-        mine = AcceptMine(mocked_repo, author="author", commiter="commiter")
+        mine = AcceptMine(mocked_repo, author="author", committer="committer")
 
         mine._create_local_copy = mocked_copy
         mine._create_remote_copy = mocked_remote_copy
@@ -166,7 +165,7 @@ class TestAcceptMine(object):
         # We need to check the complete call sequence including the chained calls
         expected_mock_calls = [
             call("refs/heads/merging_remote"),  # In merge method for commit
-            call("refs/heads/merging_remote"),  # At end of merge method  
+            call("refs/heads/merging_remote"),  # At end of merge method
             call("refs/heads/merging_local"),   # In clean_up method
             call().delete(),                    # Chained .delete() on merging_local ref
             call("refs/heads/merging_remote"),  # In clean_up method
@@ -174,7 +173,7 @@ class TestAcceptMine(object):
         ]
         mocked_repo.lookup_reference.assert_has_calls(expected_mock_calls)
         mocked_repo.commit.assert_called_once_with(
-            "merging: message", "author", "commiter", ref="refs/heads/merging_remote", parents=["target", 1]
+            "merging: message", "author", "committer", ref="refs/heads/merging_remote", parents=["target", 1]
         )
         # create_reference is called twice: once for the commit, once to update local branch
         expected_create_calls = [

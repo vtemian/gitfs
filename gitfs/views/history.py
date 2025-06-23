@@ -41,7 +41,7 @@ class HistoryView(ReadOnlyView):
         if path not in self.repo.get_commit_dates() and path != "/":
             raise FuseOSError(ENOENT)
 
-        attrs = super(HistoryView, self).getattr(path, fh)
+        attrs = super().getattr(path, fh)
         attrs.update(
             {
                 "st_mode": S_IFDIR | 0o555,
@@ -77,8 +77,7 @@ class HistoryView(ReadOnlyView):
             additional_entries = self.repo.get_commit_dates()
 
         dir_entries = [".", ".."] + additional_entries
-        for entry in dir_entries:
-            yield entry
+        yield from dir_entries
 
     def _get_commit_time(self, index):
         date = getattr(self, "date", None)
