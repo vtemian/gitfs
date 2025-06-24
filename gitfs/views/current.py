@@ -287,51 +287,52 @@ class CurrentView(PassthroughView):
     def _add_file_to_index(self, path):
         """Add a file to the git index, handling LFS when appropriate."""
         full_path = os.path.join(self.mount_path, path)
-        
+
         # Check if LFS is enabled and this file should use LFS
-        if (self.repo.lfs.is_lfs_enabled() and 
-            os.path.exists(full_path) and 
-            os.path.isfile(full_path)):
-            
+        if (
+            self.repo.lfs.is_lfs_enabled()
+            and os.path.exists(full_path)
+            and os.path.isfile(full_path)
+        ):
             file_size = os.path.getsize(full_path)
-            
+
             # Check if this file should use LFS based on gitattributes
             if self.repo.lfs.should_use_lfs(path, file_size):
                 log.info(f"Using LFS for large file: {path} ({file_size} bytes)")
-                
+
                 try:
                     # Read file content and create LFS pointer
-                    with open(full_path, 'rb') as f:
+                    with open(full_path, "rb") as f:
                         content = f.read()
-                    
+
                     # Create LFS pointer
                     pointer = LFSPointer.create_for_file(full_path)
-                    
+
                     # Store the actual content in LFS object store
                     self.repo.lfs.store_lfs_object(content, pointer.oid)
-                    
+
                     # Replace file content with pointer content temporarily
                     original_content = content
                     pointer_content = pointer.to_content()
-                    
+
                     # Write pointer content to the file temporarily
-                    with open(full_path, 'wb') as f:
+                    with open(full_path, "wb") as f:
                         f.write(pointer_content)
-                    
+
                     # Add the pointer file to the index
                     self.repo.index.add(path)
-                    
+
                     # Restore original content to the working directory
-                    with open(full_path, 'wb') as f:
+                    with open(full_path, "wb") as f:
                         f.write(original_content)
-                    
+
                     log.debug(f"Created LFS pointer for {path}: {pointer.oid}")
                     return
-                    
+
                 except Exception as e:
                     log.error(f"Failed to create LFS pointer for {path}: {e}")
                     # Fall back to regular git add
-        
+
         # Regular file or LFS not enabled/applicable
         self.repo.index.add(path)
 

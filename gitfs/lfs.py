@@ -118,9 +118,14 @@ class LFSPointer:
 class LFSManager:
     """Manages Git LFS operations for a repository."""
 
-    def __init__(self, repo_path: str, enabled: bool = True, 
-                 size_threshold: float = 100.0, auto_fetch: bool = True, 
-                 auto_push: bool = True):
+    def __init__(
+        self,
+        repo_path: str,
+        enabled: bool = True,
+        size_threshold: float = 100.0,
+        auto_fetch: bool = True,
+        auto_push: bool = True,
+    ):
         """Initialize LFS manager.
 
         Args:
@@ -146,7 +151,7 @@ class LFSManager:
         """
         if not self.enabled:
             return False
-            
+
         try:
             result = subprocess.run(
                 ["git", "lfs", "env"],
@@ -257,11 +262,11 @@ class LFSManager:
         """
         if not self.enabled:
             return False
-            
+
         # Check size threshold first for performance
         if content_size >= self.size_threshold:
             return True
-            
+
         try:
             # Check git attributes for this file
             result = subprocess.run(

@@ -345,13 +345,13 @@ class Repository:
         :rtype: int
         """
         blob = self.get_git_object(tree, path)
-        
+
         # Check if this is an LFS pointer
         if self.lfs.is_lfs_enabled():
             pointer = LFSPointer.from_content(blob.data)
             if pointer:
                 return pointer.size
-        
+
         return blob.size
 
     def get_blob_data(self, tree, path):
@@ -366,7 +366,7 @@ class Repository:
         :rtype: str
         """
         blob = self.get_git_object(tree, path)
-        
+
         # Check if this is an LFS pointer
         if self.lfs.is_lfs_enabled():
             pointer = LFSPointer.from_content(blob.data)
@@ -377,16 +377,18 @@ class Repository:
                     return lfs_content
                 else:
                     # LFS object not available locally, try to fetch it
-                    log.warning(f"LFS object {pointer.oid} not found locally for {path}, attempting to fetch")
+                    log.warning(
+                        f"LFS object {pointer.oid} not found locally for {path}, attempting to fetch"
+                    )
                     if self.lfs.fetch_lfs_objects():
                         lfs_content = self.lfs.get_lfs_object_content(pointer)
                         if lfs_content is not None:
                             return lfs_content
-                    
+
                     # If we still can't get the content, return the pointer as a fallback
                     log.error(f"Failed to fetch LFS object {pointer.oid} for {path}")
                     return blob.data
-        
+
         return blob.data
 
     def get_commit_dates(self):
