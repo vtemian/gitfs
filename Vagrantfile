@@ -38,6 +38,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     To get started:
       vagrant ssh
       cd /vagrant
-      uv run make test
+      make test
   MSG
 end
