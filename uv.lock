@@ -203,7 +203,7 @@ requires-dist = [
     { name = "mock", marker = "extra == 'test'", specifier = "==5.1.0" },
     { name = "pex", marker = "extra == 'dev'" },
     { name = "pycparser", specifier = ">=2.21" },
-    { name = "pygit2", specifier = ">=1.12.2" },
+    { name = "pygit2", specifier = ">=1.18.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4.3" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=7.4.3" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },

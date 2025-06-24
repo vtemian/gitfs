@@ -31,7 +31,7 @@ dependencies = [
     "cffi>=1.15.1",
     "fusepy==3.0.1",
     "pycparser>=2.21",
-    "pygit2>=1.12.2",
+    "pygit2>=1.18.0",
     "sentry-sdk>=1.0.0",
 ]
 
