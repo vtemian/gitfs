@@ -32,7 +32,6 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q \
     python3.11-dev \
     python3.11-venv \
     python3.11-distutils \
-    python3-pip \
     libffi-dev \
     libgit2-dev \
     libfuse-dev \
@@ -46,30 +45,22 @@ sudo chmod 666 /dev/fuse
 echo 'user_allow_other' | sudo tee -a /etc/fuse.conf > /dev/null
 sudo chmod 644 /etc/fuse.conf
 
-echo "Setting up Python virtual environment..."
-python -m venv /home/vagrant/gitfs
-echo "source \$HOME/gitfs/bin/activate" >> "$HOME/.bashrc"
+echo "Installing uv..."
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
 
-echo "Upgrading pip in virtual environment..."
-/home/vagrant/gitfs/bin/python -m pip install --upgrade pip setuptools wheel
-
-echo "Installing cffi..."
-/home/vagrant/gitfs/bin/pip install -q 'cffi>=1.15.1'
-
-echo "Installing Python dependencies..."
-/home/vagrant/gitfs/bin/pip install -q -r /vagrant/requirements.txt
-/home/vagrant/gitfs/bin/pip install -q -r /vagrant/test_requirements.txt
+echo "Setting up project with uv..."
+cd /vagrant
+uv python install 3.11
+uv sync --extra test --extra dev
 
 echo "Configuring Git..."
 git config --global user.email "vagrant@localhost"
 git config --global user.name "Vagrant"
 git config --global init.defaultBranch main
 
-echo "Installing GitFS in development mode..."
-/home/vagrant/gitfs/bin/pip install -q -e /vagrant
-
-echo "Installing ruff for code formatting..."
-/home/vagrant/gitfs/bin/pip install -q ruff
+# GitFS and ruff are already installed via uv sync
 
 echo "Provisioning completed successfully!"
 echo "GitFS development environment is ready."
@@ -77,5 +68,4 @@ echo ""
 echo "To get started:"
 echo "  vagrant ssh"
 echo "  cd /vagrant"
-echo "  source ~/gitfs/bin/activate"
-echo "  make test"
+echo "  uv run make test"
