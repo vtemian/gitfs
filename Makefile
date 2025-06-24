@@ -1,6 +1,6 @@
 PREFIX:=/usr/local
 BUILD_DIR:=build
-VIRTUAL_ENV?=$(BUILD_DIR)/virtualenv
+VENV_DIR?=$(BUILD_DIR)/.venv
 
 TESTS?=tests
 PYTHON?=3.11
@@ -24,28 +24,25 @@ install: $(BUILD_DIR)/gitfs
 uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/bin/gitfs
 
-$(BUILD_DIR)/gitfs: $(BUILD_DIR) $(VIRTUAL_ENV)/bin/pex
-	$(VIRTUAL_ENV)/bin/pex -v --disable-cache -r requirements.txt -e gitfs:mount -o $(BUILD_DIR)/gitfs .
-
-$(VIRTUAL_ENV)/bin/pex: virtualenv
-	$(VIRTUAL_ENV)/bin/pip install pex wheel
-
-$(VIRTUAL_ENV)/bin/mkdocs: virtualenv
-	$(VIRTUAL_ENV)/bin/pip install mkdocs
+$(BUILD_DIR)/gitfs: $(BUILD_DIR) venv-dev
+	uv run pex -v --disable-cache -e gitfs:mount -o $(BUILD_DIR)/gitfs .
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(VIRTUAL_ENV)/bin/py.test: $(VIRTUAL_ENV)/bin/pip$(PYTHON)
-	@touch $@
+venv-dev: uv.lock
+	uv sync --extra dev
 
-$(VIRTUAL_ENV)/bin/pip%:
-	python$* -m venv $(VIRTUAL_ENV)
-	$(VIRTUAL_ENV)/bin/pip install --upgrade pip setuptools
+venv-test: uv.lock  
+	uv sync --extra test
 
-virtualenv: $(VIRTUAL_ENV)/bin/pip$(PYTHON)
+venv-docs: uv.lock
+	uv sync --extra docs
 
-testenv: virtualenv
+uv.lock: pyproject.toml
+	uv lock
+
+testenv: venv-test
 	script/testenv
 
 test: clean testenv
@@ -54,19 +51,20 @@ test: clean testenv
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(TEST_DIR)
+	rm -rf .venv
 
-format:
-	ruff format gitfs
+format: venv-dev
+	uv run ruff format gitfs
 
-lint:
-	ruff format --check gitfs
+lint: venv-dev
+	uv run ruff format --check gitfs
 
 verify-lint: lint
 	git diff --exit-code
 
 .PHONY: docs
-docs: $(VIRTUAL_ENV)/bin/mkdocs
-	$(VIRTUAL_ENV)/bin/mkdocs build --clean
+docs: venv-docs
+	uv run mkdocs build --clean
 
 .PHONY: gh-pages
 gh-pages: docs
@@ -77,4 +75,4 @@ gh-pages: docs
 	echo -n "(autodoc) " > /tmp/COMMIT_MESSAGE ; git log -1 --pretty=%B >> /tmp/COMMIT_MESSAGE ; echo >> /tmp/COMMIT_MESSAGE ; echo "Commited-By: $$CI_BUILD_URL" >> /tmp/COMMIT_MESSAGE
 	git commit -F /tmp/COMMIT_MESSAGE
 
-.PHONY: clean test testenv virtualenv all format
+.PHONY: clean test testenv venv-dev venv-test venv-docs all format lint verify-lint docs gh-pages

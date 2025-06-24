@@ -1,6 +1,0 @@
-atomiclong==0.1.1
-cffi>=1.15.1
-fusepy==3.0.1
-pycparser>=2.21
-pygit2>=1.12.2
-sentry-sdk>=1.0.0

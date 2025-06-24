@@ -2,8 +2,7 @@
 
 set -e
 
-"$VIRTUAL_ENV/bin/pip" install -e .
-"$VIRTUAL_ENV/bin/gitfs" "$BARE_REPO" "$MNT_DIR" -o \
+uv run gitfs "$BARE_REPO" "$MNT_DIR" -o \
 "repo_path=$REPO_DIR,fetch_timeout=.1,merge_timeout=.1,\
 allow_other=true,foreground=true,log=log.txt,debug=true,idle_fetch_timeout=.1" &\
 
@@ -14,7 +13,7 @@ export MOUNT_PATH="$MNT_DIR"
 export REPO_PATH="$REPO_DIR"
 export REMOTE="$REMOTE"
 
-"$VIRTUAL_ENV/bin/py.test" --assert=plain --cov --cov-config .coveragerc "$TESTS"
+uv run pytest --assert=plain --cov --cov-config .coveragerc "$TESTS"
 kill -9 "$(cat "$GITFS_PID")"
 
 if [ "$EUID" -ne 0 ]; then
