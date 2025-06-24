@@ -32,6 +32,7 @@ from pygit2 import (
 
 from gitfs.cache import CommitCache
 from gitfs.log import log
+from gitfs.lfs import LFSManager, LFSPointer
 from gitfs.utils.commits import CommitsList
 from gitfs.utils.path import split_path_into_components
 
@@ -45,6 +46,7 @@ class Repository:
     def __init__(self, repository, commits=None):
         self._repo = repository
         self.commits = commits or CommitCache(self)
+        self.lfs = LFSManager(repository.workdir)
 
         self.behind = False
 
@@ -342,7 +344,15 @@ class Repository:
         :returns: the size of data contained by the blob object.
         :rtype: int
         """
-        return self.get_git_object(tree, path).size
+        blob = self.get_git_object(tree, path)
+        
+        # Check if this is an LFS pointer
+        if self.lfs.is_lfs_enabled():
+            pointer = LFSPointer.from_content(blob.data)
+            if pointer:
+                return pointer.size
+        
+        return blob.size
 
     def get_blob_data(self, tree, path):
         """
@@ -355,7 +365,29 @@ class Repository:
         :returns: the data contained by the blob object.
         :rtype: str
         """
-        return self.get_git_object(tree, path).data
+        blob = self.get_git_object(tree, path)
+        
+        # Check if this is an LFS pointer
+        if self.lfs.is_lfs_enabled():
+            pointer = LFSPointer.from_content(blob.data)
+            if pointer:
+                # Try to get the actual LFS object content
+                lfs_content = self.lfs.get_lfs_object_content(pointer)
+                if lfs_content is not None:
+                    return lfs_content
+                else:
+                    # LFS object not available locally, try to fetch it
+                    log.warning(f"LFS object {pointer.oid} not found locally for {path}, attempting to fetch")
+                    if self.lfs.fetch_lfs_objects():
+                        lfs_content = self.lfs.get_lfs_object_content(pointer)
+                        if lfs_content is not None:
+                            return lfs_content
+                    
+                    # If we still can't get the content, return the pointer as a fallback
+                    log.error(f"Failed to fetch LFS object {pointer.oid} for {path}")
+                    return blob.data
+        
+        return blob.data
 
     def get_commit_dates(self):
         """
