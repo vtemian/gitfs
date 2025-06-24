@@ -1,2 +1,0 @@
--r test_requirements.txt
-ruff>=0.12.0

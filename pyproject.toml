@@ -1,20 +1,90 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gitfs"
+dynamic = ["version"]
+description = "Version controlled file system."
+authors = [
+    {name = "Presslabs", email = "gitfs@presslabs.com"}
+]
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: System :: Filesystems",
+]
+keywords = ["git", "filesystem", "fuse", "version-control"]
+dependencies = [
+    "atomiclong==0.1.1",
+    "cffi>=1.15.1",
+    "fusepy==3.0.1",
+    "pycparser>=2.21",
+    "pygit2>=1.12.2",
+    "sentry-sdk>=1.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "mock==5.1.0",
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+]
+dev = [
+    "gitfs[test]",
+    "ruff>=0.12.0",
+    "pex",
+    "wheel",
+]
+docs = [
+    "mkdocs",
+]
+
+[project.urls]
+Homepage = "http://www.presslabs.com/gitfs/"
+Repository = "https://github.com/PressLabs/gitfs"
+Documentation = "http://www.presslabs.com/gitfs/"
+Issues = "https://github.com/PressLabs/gitfs/issues"
+
+[project.scripts]
+gitfs = "gitfs:mount"
+
+[tool.hatch.version]
+path = "gitfs/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["gitfs"]
+
 [tool.ruff]
 # Equivalent to black's target-version py311
 target-version = "py311"
-
 # Line length (black's default is 88)
 line-length = 88
+extend-exclude = [
+    "build",
+    "dist",
+    ".venv",
+    ".git",
+]
 
 [tool.ruff.format]
 # Use double quotes for strings (black's default)
 quote-style = "double"
-
 # Use spaces for indentation (black's default)
 indent-style = "space"
-
 # Respect magic trailing commas (black's default)
 skip-magic-trailing-comma = false
-
 # Auto-detect line endings (black's default)
 line-ending = "auto"
 
@@ -29,7 +99,6 @@ select = [
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
 ]
-
 # Ignore some rules that might be too strict for existing codebase
 ignore = [
     "E501",  # Line too long (handled by formatter)
@@ -42,3 +111,42 @@ ignore = [
 force-single-line = false
 force-sort-within-sections = false
 lines-after-imports = 2
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=gitfs",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["gitfs"]
+omit = [
+    "tests/*",
+    "*/__main__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
