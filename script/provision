@@ -46,14 +46,25 @@ echo 'user_allow_other' | sudo tee -a /etc/fuse.conf > /dev/null
 sudo chmod 644 /etc/fuse.conf
 
 echo "Installing uv..."
+# Install uv system-wide so it's available for all users
+curl -LsSf https://astral.sh/uv/install.sh | sudo sh
+# Also install for vagrant user
 curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.local/bin:$PATH"
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
 
+echo "Verifying uv installation..."
+if ! command -v uv &> /dev/null && ! command -v ~/.local/bin/uv &> /dev/null; then
+    echo "ERROR: uv installation failed!"
+    exit 1
+fi
+
 echo "Setting up project with uv..."
 cd /vagrant
-uv python install 3.11
-uv sync --extra test --extra dev
+# Ensure uv is in PATH
+export PATH="$HOME/.local/bin:$PATH"
+~/.local/bin/uv python install 3.11
+~/.local/bin/uv sync --extra test --extra dev
 
 echo "Configuring Git..."
 git config --global user.email "vagrant@localhost"
