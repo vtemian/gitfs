@@ -61,6 +61,10 @@ class Args:
                 ("max_open_files", (-1, "int")),
                 ("history_path", ("history", "string")),
                 ("current_path", ("current", "string")),
+                ("lfs_enabled", (True, "bool")),
+                ("lfs_size_threshold", (100, "float")),
+                ("lfs_auto_fetch", (True, "bool")),
+                ("lfs_auto_push", (True, "bool")),
             ]
         )
         self.config = self.build_config(parser.parse_args())

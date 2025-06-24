@@ -39,6 +39,37 @@ git push -u origin HEAD  # Push current branch to remote
 
 GitFS is a Python FUSE (Filesystem in Userspace) filesystem that integrates with Git repositories. It allows mounting remote repositories as local filesystems where file changes are automatically committed and synchronized with the remote.
 
+### Git LFS Support
+
+GitFS includes comprehensive Git LFS (Large File Storage) support for handling large files efficiently:
+
+- **Automatic LFS Detection**: Files larger than the configured threshold are automatically stored using LFS
+- **Transparent Access**: LFS files are seamlessly accessible through the filesystem interface
+- **Configurable Thresholds**: Size-based and pattern-based LFS usage via mount options
+- **Background Operations**: Automatic LFS fetch/push operations with repository synchronization
+
+#### LFS Configuration Options
+
+Available via `-o` mount parameter:
+
+- `lfs_enabled=true/false` - Enable/disable LFS support (default: true)
+- `lfs_size_threshold=100` - Size threshold in MB for automatic LFS usage (default: 100MB)
+- `lfs_auto_fetch=true/false` - Automatically fetch missing LFS objects (default: true)
+- `lfs_auto_push=true/false` - Automatically push LFS objects during sync (default: true)
+
+#### Usage Examples
+
+```bash
+# Enable LFS with 50MB threshold
+gitfs git@github.com:user/repo.git /mount/point -o lfs_size_threshold=50
+
+# Disable LFS entirely
+gitfs git@github.com:user/repo.git /mount/point -o lfs_enabled=false
+
+# LFS with manual sync control
+gitfs git@github.com:user/repo.git /mount/point -o lfs_auto_fetch=false,lfs_auto_push=false
+```
+
 ## Development Commands
 
 ### Testing

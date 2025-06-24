@@ -27,6 +27,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q \
     build-essential \
     software-properties-common \
     git \
+    git-lfs \
     curl \
     python3.11 \
     python3.11-dev \
