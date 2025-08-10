@@ -17,7 +17,7 @@ import errno
 import os
 import re
 
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 
 from gitfs.events import writers
 from gitfs.log import log
@@ -130,12 +130,19 @@ class CurrentView(PassthroughView):
         return result
 
     def create(self, path, mode, fi=None):
-        fh = self.open_for_write(path, os.O_WRONLY | os.O_CREAT)
+        # FUSE3 compatibility: add O_TRUNC for proper file creation
+        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+        fh = self.open_for_write(path, flags)
         super().chmod(path, mode)
 
         self.dirty[fh] = {"message": f"Created {path}", "stage": True}
 
         log.debug("CurrentView: Created %s", path)
+
+        # FUSE3 might set file info in fi parameter
+        if fi is not None and hasattr(fi, "fh"):
+            fi.fh = fh
+
         return fh
 
     @write_operation

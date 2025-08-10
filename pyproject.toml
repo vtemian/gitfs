@@ -29,7 +29,9 @@ keywords = ["git", "filesystem", "fuse", "version-control"]
 dependencies = [
     "atomiclong==0.1.1",
     "cffi>=1.15.1",
-    "fusepy==3.0.1",
+    # FUSE library - either mfusepy (FUSE3) or fusepy (FUSE2)
+    "mfusepy>=1.1.0,<3.0.0; platform_system != 'Darwin'",
+    "fusepy>=3.0.1; platform_system == 'Darwin'",
     "pycparser>=2.21",
     "pygit2>=1.18.0",
     "sentry-sdk>=1.0.0",

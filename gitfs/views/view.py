@@ -15,7 +15,7 @@
 
 from abc import ABCMeta
 
-from fuse import LoggingMixIn, Operations
+from gitfs.fuse_compat import LoggingMixIn, Operations
 
 
 class View(LoggingMixIn, Operations, metaclass=ABCMeta):
@@ -32,3 +32,20 @@ class View(LoggingMixIn, Operations, metaclass=ABCMeta):
             "st_ctime": self.mount_time,
             "st_mtime": self.mount_time,
         }
+
+    # FUSE 3 specific operations with default implementations
+    def copy_file_range(self, path_in, offset_in, path_out, offset_out, length, flags):
+        """FUSE 3: Copy data between file descriptors without intermediate buffer"""
+        # Return ENOSYS to indicate operation not supported
+        # FUSE will fall back to regular read/write
+        from errno import ENOSYS
+        from gitfs.fuse_compat import FuseOSError
+
+        raise FuseOSError(ENOSYS)
+
+    def lseek(self, path, offset, whence, fh):
+        """FUSE 3: Seek to a specific position in a file"""
+        # Default implementation using os.lseek
+        import os
+
+        return os.lseek(fh, offset, whence)

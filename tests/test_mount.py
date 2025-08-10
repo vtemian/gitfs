@@ -85,9 +85,8 @@ class TestMount:
             prepare_routes=mocked_routes,
             SyncWorker=mocked_merger,
             FetchWorker=mocked_fetcher,
-            FUSE=mocked_fuse,
             get_credentials=MagicMock(return_value="cred"),
-        ):
+        ), patch("gitfs.mounter.mfusepy.FUSE", mocked_fuse):
 
             assert_result = (mocked_merge_worker, mocked_fetch_worker, mocked_router)
 
@@ -147,6 +146,10 @@ class TestMount:
         mocked_fuse = MagicMock()
         MagicMock()
         mocked_args = MagicMock()
+        
+        # Configure mocked_args to simulate non-root user with allow_other enabled
+        mocked_args.allow_root = False
+        mocked_args.allow_other = True
 
         mocked_merge = MagicMock()
         mocked_fetch = MagicMock()
@@ -161,25 +164,22 @@ class TestMount:
             argparse=mocked_argp,
             parse_args=mocked_parse_args,
             prepare_components=mocked_prepare,
-            FUSE=mocked_fuse,
             resource=MagicMock(),
-        ):
+        ), patch("gitfs.mounter.mfusepy.FUSE", mocked_fuse), patch("gitfs.mounter.os.geteuid", return_value=1000):
             start_fuse()
 
             mocked_argp.ArgumentParser.assert_called_once_with(prog="GitFS")
             mocked_parse_args.assert_called_once_with("args")
             mocked_prepare.assert_called_once_with(mocked_args)
 
+            # Mount options are conditionally set based on user privileges
+            # For non-root user with allow_other=True, expect allow_other to be True
             excepted_call = {
                 "foreground": mocked_args.foreground,
-                "allow_root": mocked_args.allow_root,
-                "allow_other": mocked_args.allow_other,
-                "subtype": "gitfs",
                 "fsname": mocked_args.remote_url,
+                "subtype": "gitfs",
+                "allow_other": True,  # Should be True for non-root user
             }
-
-            if sys.platform != "darwin":
-                excepted_call["nonempty"] = True
 
             mocked_fuse.assert_called_once_with(
                 mocked_router, mocked_args.mount_point, **excepted_call

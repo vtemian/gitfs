@@ -16,7 +16,7 @@
 from stat import S_IFDIR
 
 import pytest
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 
 from gitfs.views.index import IndexView
 

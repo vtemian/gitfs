@@ -18,7 +18,7 @@ from threading import Event
 from unittest.mock import MagicMock, call, patch
 
 import pytest
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 
 from gitfs.cache.gitignore import CachedIgnore
 from gitfs.views.current import CurrentView

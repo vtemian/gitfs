@@ -13,13 +13,15 @@
 # limitations under the License.
 
 
+import errno
 import fcntl
 import os
 from errno import EACCES
 
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 
 from .view import View
+from gitfs.log import log
 
 
 STATS = (
@@ -158,9 +160,6 @@ class PassthroughView(View):
     def lock(self, path, fh, cmd, lock):
         fcntl.lockf(fh, fcntl.LOCK_EX)
 
-    def release(self, path, fh):
-        fcntl.lockf(fh, fcntl.LOCK_UN)
-
     def flush(self, path, fh):
         return os.fsync(fh)
 
@@ -169,3 +168,27 @@ class PassthroughView(View):
 
     def fsync(self, path, fdatasync, fh):
         return os.fsync(fh)
+
+    def copy_file_range(
+        self, path_in, fh_in, offset_in, path_out, fh_out, offset_out, length, flags
+    ):
+        """FUSE3 copy_file_range operation - copy data between file descriptors"""
+        try:
+            # Try to use os.copy_file_range if available (Linux 4.5+)
+            if hasattr(os, "copy_file_range"):
+                return os.copy_file_range(fh_in, fh_out, length, offset_in, offset_out)
+            else:
+                # Fallback: manual copy using read/write
+                os.lseek(fh_in, offset_in, os.SEEK_SET)
+                data = os.read(fh_in, length)
+                os.lseek(fh_out, offset_out, os.SEEK_SET)
+                return os.write(fh_out, data)
+        except OSError as e:
+            raise FuseOSError(e.errno)
+
+    def lseek(self, path, offset, whence, fh):
+        """FUSE3 lseek operation - seek to position in file"""
+        try:
+            return os.lseek(fh, offset, whence)
+        except OSError as e:
+            raise FuseOSError(e.errno)

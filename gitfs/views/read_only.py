@@ -16,12 +16,17 @@
 import os
 from errno import EROFS
 
-from fuse import ENOTSUP, FuseOSError
+from gitfs.fuse_compat import ENOTSUP, FuseOSError
 
 from .view import View
 
 
 class ReadOnlyView(View):
+    """
+    Base class for read-only filesystem views.
+    Allows read operations but blocks all write operations.
+    """
+
     def getxattr(self, path, name, *args):
         raise FuseOSError(ENOTSUP)
 
@@ -33,10 +38,10 @@ class ReadOnlyView(View):
 
         return 0
 
-    def create(self, path, fh):
+    def create(self, path, mode, fi=None):
         raise FuseOSError(EROFS)
 
-    def write(self, path, fh):
+    def write(self, path, buf, offset, fh):
         raise FuseOSError(EROFS)
 
     def opendir(self, path):

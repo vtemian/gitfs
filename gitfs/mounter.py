@@ -14,10 +14,10 @@
 
 
 import argparse
+import os
 import resource
 import sys
 
-from fuse import FUSE
 from pygit2 import Keypair, RemoteCallbacks, UserPass
 
 from gitfs import __version__
@@ -25,6 +25,9 @@ from gitfs.router import Router
 from gitfs.routes import prepare_routes
 from gitfs.utils import Args
 from gitfs.worker import CommitQueue, FetchWorker, SyncWorker
+from gitfs.log import log
+
+from gitfs.fuse_compat import get_fuse_module, is_fuse3, get_fuse_version, FUSE
 
 
 def parse_args(parser):
@@ -121,12 +124,16 @@ def start_fuse():
     parser = argparse.ArgumentParser(prog="GitFS")
     args = parse_args(parser)
 
-    # try:
-    print("Preparing components...", args)
+    # Log FUSE version information
+    fuse_version = get_fuse_version()
+    fuse_type = "FUSE 3" if is_fuse3() else "FUSE 2"
+    log.info(f"Using {fuse_type} (version {fuse_version})")
+
+    fuse_module = get_fuse_module()
+    if hasattr(fuse_module, "_libfuse_path"):
+        log.info(f"FUSE library: {fuse_module._libfuse_path}")
+
     merge_worker, fetch_worker, router = prepare_components(args)
-    # except:
-    #     print("Error while preparing components, exiting...")
-    #     return
 
     if args.max_open_files != -1:
         resource.setrlimit(
@@ -134,27 +141,55 @@ def start_fuse():
         )
 
     # ready to mount it
-    if sys.platform == "darwin":
-        FUSE(
-            router,
-            args.mount_point,
-            foreground=args.foreground,
-            allow_root=args.allow_root,
-            allow_other=args.allow_other,
-            fsname=args.remote_url,
-            subtype="gitfs",
-        )
+    fuse_kwargs = {
+        "foreground": args.foreground,
+        "fsname": args.remote_url,
+        "subtype": "gitfs",
+        "rw": True,  # Explicitly set read-write mode for FUSE3
+    }
+
+    # Configure mount options based on FUSE version
+    if is_fuse3():
+        log.info("Using FUSE 3 mount options")
+        # Add default_permissions to let FUSE3 handle permissions properly
+        fuse_kwargs["default_permissions"] = True
+
+        # Only add allow_other if not running as root
+        # In FUSE3, allow_other and allow_root are mutually exclusive
+        if args.allow_root and os.geteuid() == 0:
+            fuse_kwargs["allow_root"] = True
+        elif args.allow_other:
+            fuse_kwargs["allow_other"] = True
     else:
-        FUSE(
-            router,
-            args.mount_point,
-            foreground=args.foreground,
-            nonempty=True,
-            allow_root=args.allow_root,
-            allow_other=args.allow_other,
-            fsname=args.remote_url,
-            subtype="gitfs",
-        )
+        log.info("Using FUSE 2 mount options")
+        # FUSE2 allows both allow_other and allow_root
+        if args.allow_root:
+            fuse_kwargs["allow_root"] = True
+        if args.allow_other:
+            fuse_kwargs["allow_other"] = True
+
+    # Workaround for mfusepy issue where it looks for operations on FUSE object
+    if is_fuse3():
+        # Create a wrapped FUSE class that provides missing methods
+        class FUSE3Wrapper(FUSE):
+            def __init__(self, operations, *args, **kwargs):
+                # Add FUSE3 operations to self so mfusepy can find them
+                for op_name in ["copy_file_range", "lseek"]:
+                    if hasattr(operations, op_name):
+                        # Create a method that delegates to operations
+                        def make_delegator(name):
+                            def delegator(*args, **kwargs):
+                                return getattr(operations, name)(*args, **kwargs)
+
+                            return delegator
+
+                        setattr(self, op_name, make_delegator(op_name))
+
+                super().__init__(operations, *args, **kwargs)
+
+        FUSE3Wrapper(router, args.mount_point, **fuse_kwargs)
+    else:
+        FUSE(router, args.mount_point, **fuse_kwargs)
 
 
 if __name__ == "__main__":

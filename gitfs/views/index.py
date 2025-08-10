@@ -16,7 +16,7 @@
 from errno import ENOENT
 from stat import S_IFDIR
 
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 
 from .read_only import ReadOnlyView
 

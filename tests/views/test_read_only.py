@@ -16,7 +16,7 @@
 import os
 
 import pytest
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 
 from gitfs.views.read_only import ReadOnlyView
 
@@ -25,9 +25,21 @@ class TestReadOnly:
     def test_cant_write(self):
         view = ReadOnlyView()
 
-        for method in ["write", "create", "utimens", "chmod", "mkdir"]:
-            with pytest.raises(FuseOSError):
-                getattr(view, method)("path", 1)
+        # Test methods with their proper signatures
+        with pytest.raises(FuseOSError):
+            view.write("path", b"data", 0, 1)  # write(path, buf, offset, fh)
+            
+        with pytest.raises(FuseOSError):
+            view.create("path", 0o644)  # create(path, mode, fi=None)
+            
+        with pytest.raises(FuseOSError):
+            view.utimens("path")  # utimens(path, times=None)
+            
+        with pytest.raises(FuseOSError):
+            view.chmod("path", 0o644)  # chmod(path, mode)
+            
+        with pytest.raises(FuseOSError):
+            view.mkdir("path", 0o755)  # mkdir(path, mode)
 
         with pytest.raises(FuseOSError):
             view.getxattr("path", "name", 1)

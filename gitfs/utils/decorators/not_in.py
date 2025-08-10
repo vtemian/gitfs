@@ -17,7 +17,7 @@ import errno
 import inspect
 from functools import wraps
 
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 
 
 class not_in:

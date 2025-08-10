@@ -22,7 +22,7 @@ from errno import ENOSYS
 from grp import getgrnam
 from pwd import getpwnam
 
-from fuse import FUSE, FuseOSError
+from gitfs.fuse_compat import get_fuse_module, is_fuse3, FUSE, FuseOSError
 
 from gitfs.cache import CachedIgnore, lru_cache
 from gitfs.events import fetch, idle, shutting_down
@@ -103,50 +103,25 @@ class Router:
 
         log.debug("Done init")
 
+    def init_with_config(self, conn, config):
+        """Compatibility method for mfusepy - delegates to init"""
+        return self.init("/")
+
     def destroy(self, path):
         log.debug("Stopping workers")
         shutting_down.set()
         fetch.set()
 
         for worker in self.workers:
-            worker.join()
+            try:
+                if hasattr(worker, "is_alive") and worker.is_alive():
+                    worker.join()
+            except RuntimeError as e:
+                log.debug(f"Worker join failed: {e}")
         log.debug("Workers stopped")
 
         shutil.rmtree(self.repo_path)
         log.info("Successfully umounted %s", self.mount_path)
-
-    def __call__(self, operation, *args):
-        """
-        Magic method which calls a specific method from a view.
-
-        In Fuse API, almost each method receives a path argument. Based on that
-        path we can route each call to a specific view. For example, if a
-        method which has a path argument like `/current/dir1/dir2/file1` is
-        called, we need to get the certain view that will know how to handle
-        this path, instantiate it and then call our method on the newly created
-        object.
-
-        :param str operation: Method name to be called
-        :param args: tuple containing the arguments to be transmitted to
-            the method
-        :rtype: function
-        """
-
-        if operation in ["destroy", "init"]:
-            view = self
-        else:
-            path = args[0]
-            view, relative_path = self.get_view(path)
-            args = (relative_path,) + args[1:]
-
-        log.debug(f"Call {operation} {view.__class__.__name__} with {args!r}")
-
-        if not hasattr(view, operation):
-            log.debug(f"No attribute {operation} on {view.__class__.__name__}")
-            raise FuseOSError(ENOSYS)
-
-        idle.clear()
-        return getattr(view, operation)(*args)
 
     def register(self, routes):
         for regex, view in routes:
@@ -203,6 +178,9 @@ class Router:
             args = set(groups) - set(kwargs.values())
             view = route["view"](*args, **kwargs)
 
+            # Debug: Log which view type is being used for each path
+            log.debug(f"Router: Path '{path}' -> {view.__class__.__name__}")
+
             lru_cache[cache_key] = view
             log.debug("Router: Added %s to cache", path)
 
@@ -210,14 +188,126 @@ class Router:
 
         raise ValueError(f"Found no view for '{path}'")
 
+    def __call__(self, operation, *args):
+        """
+        Magic method which calls a specific method from a view.
+
+        In Fuse API, almost each method receives a path argument. Based on that
+        path we can route each call to a specific view. For example, if a
+        method which has a path argument like `/current/dir1/dir2/file1` is
+        called, we need to get the certain view that will know how to handle
+        this path, instantiate it and then call our method on the newly created
+        object.
+
+        :param str operation: Method name to be called
+        :param args: tuple containing the arguments to be transmitted to
+            the method
+        :rtype: function
+        """
+
+        if operation in ["destroy", "init"]:
+            view = self
+        else:
+            path = args[0]
+            view, relative_path = self.get_view(path)
+            args = (relative_path,) + args[1:]
+
+        log.debug(f"Call {operation} {view.__class__.__name__} with {args!r}")
+
+        if not hasattr(view, operation):
+            log.debug(f"No attribute {operation} on {view.__class__.__name__}")
+            raise FuseOSError(ENOSYS)
+
+        idle.clear()
+        result = getattr(view, operation)(*args)
+        idle.set()
+
+        return result
+
+    def _create_operation_method(self, operation_name):
+        """Create a method that delegates to the router's __call__ method"""
+
+        def operation_method(*args, **kwargs):
+            return self.__call__(operation_name, *args, **kwargs)
+
+        operation_method.__name__ = operation_name
+        return operation_method
+
     def __getattr__(self, attr_name):
         """
-        It will only be called by the `__init__` method from `fuse.FUSE` to
-        establish which operations will be allowed after mounting the
-        filesystem.
+        Handle dynamic method creation for FUSE operations.
+
+        During FUSE initialization, this method will be called to get
+        callable methods for supported operations.
         """
 
-        methods = inspect.getmembers(FUSE, predicate=callable)
-        fuse_allowed_methods = {elem[0] for elem in methods}
+        # Base FUSE operations supported by all versions
+        fuse_operations = {
+            "access",
+            "chmod",
+            "chown",
+            "create",
+            "destroy",
+            "fallocate",
+            "fgetattr",
+            "flush",
+            "fsync",
+            "fsyncdir",
+            "ftruncate",
+            "getattr",
+            "getxattr",
+            "init",
+            "ioctl",
+            "link",
+            "listxattr",
+            "mkdir",
+            "mknod",
+            "open",
+            "opendir",
+            "poll",
+            "read",
+            "readdir",
+            "readlink",
+            "release",
+            "releasedir",
+            "removexattr",
+            "rename",
+            "rmdir",
+            "setxattr",
+            "statfs",
+            "symlink",
+            "truncate",
+            "unlink",
+            "utimens",
+            "write",
+        }
 
-        return attr_name in fuse_allowed_methods - {"bmap", "lock"}
+        # Add FUSE3-specific operations if using FUSE3
+        if is_fuse3():
+            fuse3_operations = {
+                "copy_file_range",
+                "lseek",
+                "init_with_config",
+            }
+            fuse_operations = fuse_operations | fuse3_operations
+
+        # Operations we don't support at all
+        excluded_operations = {
+            "bmap",
+            "lock",
+            "flock",
+            "read_buf",
+            "write_buf",
+        }
+
+        supported_operations = fuse_operations - excluded_operations
+
+        if attr_name not in supported_operations:
+            raise AttributeError(
+                f"'{self.__class__.__name__}' object has no attribute '{attr_name}'"
+            )
+
+        # Create and cache the method to avoid recreating it repeatedly
+        method = self._create_operation_method(attr_name)
+        setattr(self, attr_name, method)
+        return method

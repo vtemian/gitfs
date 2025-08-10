@@ -34,16 +34,18 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q \
     python3.11-distutils \
     libffi-dev \
     libgit2-dev \
-    libfuse-dev \
-    fuse \
+    libfuse3-dev \
+    fuse3 \
     pkg-config
 
-echo "Configuring FUSE..."
+echo "Configuring FUSE3..."
 sudo groupadd -f fuse
 sudo usermod -a -G fuse "$USER"
 sudo chmod 666 /dev/fuse
-echo 'user_allow_other' | sudo tee -a /etc/fuse.conf > /dev/null
+echo 'user_allow_other' | sudo tee /etc/fuse.conf > /dev/null
 sudo chmod 644 /etc/fuse.conf
+# Make fusermount3 setuid for non-root mounting
+sudo chmod u+s /usr/bin/fusermount3
 
 echo "Installing uv..."
 # Install uv system-wide so it's available for all users

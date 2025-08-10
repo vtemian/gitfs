@@ -17,7 +17,7 @@ import os
 from io import TextIOWrapper
 from unittest.mock import MagicMock, call, patch
 
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 from pytest import raises
 
 from gitfs.views import PassthroughView

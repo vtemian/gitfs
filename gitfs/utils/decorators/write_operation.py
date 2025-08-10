@@ -16,7 +16,7 @@
 from errno import EROFS
 from functools import wraps
 
-from fuse import FuseOSError
+from gitfs.fuse_compat import FuseOSError
 
 from gitfs.events import fetch_successful, push_successful, sync_done, syncing, writers
 from gitfs.log import log
@@ -26,6 +26,9 @@ def write_operation(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not fetch_successful.is_set() or not push_successful.is_set():
+            log.debug(
+                f"WriteOperation blocked: fetch_successful={fetch_successful.is_set()}, push_successful={push_successful.is_set()}"
+            )
             raise FuseOSError(EROFS)
 
         global writers

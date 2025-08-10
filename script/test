@@ -2,11 +2,46 @@
 
 set -e
 
+# Set FUSE_LIBRARY_PATH based on platform
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    export FUSE_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu/libfuse3.so.3
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # On macOS, let the compatibility layer handle library detection
+    unset FUSE_LIBRARY_PATH
+fi
+
+echo "Starting GitFS mount..."
+echo "BARE_REPO: $BARE_REPO"
+echo "MNT_DIR: $MNT_DIR"
+echo "REPO_DIR: $REPO_DIR"
+
+# Start gitfs and capture both stdout and stderr
 uv run gitfs "$BARE_REPO" "$MNT_DIR" -o \
 "repo_path=$REPO_DIR,fetch_timeout=.1,merge_timeout=.1,\
-allow_other=true,foreground=true,log=log.txt,debug=true,idle_fetch_timeout=.1" &\
+allow_other=true,foreground=true,log=log.txt,debug=true,idle_fetch_timeout=.1" > gitfs_output.log 2>&1 &
 
-echo $! > "$GITFS_PID"
+GITFS_PID=$!
+echo $GITFS_PID > "$GITFS_PID"
+
+# Wait a bit for mount to complete or fail
+sleep 2
+
+# Check if GitFS is still running
+if ! kill -0 "$GITFS_PID" 2>/dev/null; then
+    echo "GitFS failed to start. Output:"
+    cat gitfs_output.log
+    exit 1
+fi
+
+# Check if mount point is accessible
+if ! ls "$MNT_DIR" >/dev/null 2>&1; then
+    echo "Mount point not accessible. GitFS output:"
+    cat gitfs_output.log
+    kill -9 "$GITFS_PID" 2>/dev/null
+    exit 1
+fi
+
+echo "GitFS mount successful. Running tests..."
 
 export REPO_NAME="$REPO_NAME"
 export MOUNT_PATH="$MNT_DIR"
@@ -14,12 +49,17 @@ export REPO_PATH="$REPO_DIR"
 export REMOTE="$REMOTE"
 
 uv run pytest --assert=plain --cov --cov-config .coveragerc "$TESTS"
-kill -9 "$(cat "$GITFS_PID")"
+kill -9 "$(cat "$GITFS_PID")" 2>/dev/null
 
+# Give the filesystem time to unmount cleanly
+sleep 1
+
+# Force unmount with proper permissions
 if [ "$EUID" -ne 0 ]; then
-    sudo umount -f "$MNT_DIR"
+    sudo umount -f "$MNT_DIR" 2>/dev/null || true
+    # If there are still permission issues, force removal as root
+    sudo rm -rf "$TEST_DIR" 2>/dev/null || rm -rf "$TEST_DIR" 2>/dev/null || true
 else
-    umount -f "$MNT_DIR"
+    umount -f "$MNT_DIR" 2>/dev/null || true
+    rm -rf "$TEST_DIR"
 fi
-
-rm -rf "$TEST_DIR"
