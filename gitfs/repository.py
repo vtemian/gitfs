@@ -285,6 +285,20 @@ class Repository:
         except:
             return GIT_FILEMODE_TREE
 
+    def _safe_get_repo_object(self, entry):
+        """
+        Safely get a git object from the repository, handling missing objects.
+
+        :param entry: Git tree entry
+        :returns: Git object or None if not found
+        """
+        try:
+            return self._repo[entry.id]
+        except KeyError:
+            # Object not found in repository - this can happen with empty files
+            # or corrupted refs. Return None to indicate missing object.
+            return None
+
     def get_git_object(self, tree, path):
         """
         Returns the git object with the relative path <path>.
@@ -307,7 +321,7 @@ class Repository:
             tree,
             path_components[-1],
             path_components,
-            lambda entry: self._repo[entry.id],
+            self._safe_get_repo_object,
         )
 
     def get_git_object_default_stats(self, ref, path):
@@ -342,7 +356,10 @@ class Repository:
         :returns: the size of data contained by the blob object.
         :rtype: int
         """
-        return self.get_git_object(tree, path).size
+        git_obj = self.get_git_object(tree, path)
+        if git_obj is None:
+            return 0  # Default to 0 size for missing objects
+        return git_obj.size
 
     def get_blob_data(self, tree, path):
         """
@@ -355,7 +372,10 @@ class Repository:
         :returns: the data contained by the blob object.
         :rtype: str
         """
-        return self.get_git_object(tree, path).data
+        git_obj = self.get_git_object(tree, path)
+        if git_obj is None:
+            return b""  # Default to empty bytes for missing objects
+        return git_obj.data
 
     def get_commit_dates(self):
         """

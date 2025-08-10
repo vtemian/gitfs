@@ -1,6 +1,10 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.11"
+resolution-markers = [
+    "sys_platform != 'darwin'",
+    "sys_platform == 'darwin'",
+]
 
 [[package]]
 name = "atomiclong"
@@ -169,7 +173,7 @@ source = { editable = "." }
 dependencies = [
     { name = "atomiclong" },
     { name = "cffi" },
-    { name = "fusepy", marker = "sys_platform == 'darwin'" },
+    { name = "fusepy" },
     { name = "mfusepy", marker = "sys_platform != 'darwin'" },
     { name = "pycparser" },
     { name = "pygit2" },
@@ -198,6 +202,7 @@ test = [
 requires-dist = [
     { name = "atomiclong", specifier = "==0.1.1" },
     { name = "cffi", specifier = ">=1.15.1" },
+    { name = "fusepy", specifier = ">=3.0.1" },
     { name = "fusepy", marker = "sys_platform == 'darwin'", specifier = ">=3.0.1" },
     { name = "mfusepy", marker = "sys_platform != 'darwin'", specifier = ">=1.1.0,<3.0.0" },
     { name = "mkdocs", marker = "extra == 'docs'" },

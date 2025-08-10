@@ -49,13 +49,14 @@ def _detect_fuse_version():
             ("mfusepy", False),  # Try mfusepy as FUSE2 fallback
         ]
     else:
-        # On Linux, prefer FUSE3 (mfusepy) if available
+        # On Linux, temporarily prefer FUSE2 (fusepy) due to FUSE3 compatibility issues
+        # TODO: Fix FUSE3 (mfusepy) read/write operations and restore FUSE3 preference
+        fuse_libraries.append(("fuse", False))
+
+        # Add FUSE3 as fallback for now
         fuse3_lib = find_library("fuse3")
         if fuse3_lib:
             fuse_libraries.append(("mfusepy", True))
-
-        # Always add FUSE2 as fallback (fusepy installs as 'fuse')
-        fuse_libraries.append(("fuse", False))
 
     # Try each library in order
     last_error = None

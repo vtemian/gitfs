@@ -127,6 +127,7 @@ class Router:
         for regex, view in routes:
             log.debug("Registering %s for %s", view, regex)
             self.routes.append({"regex": regex, "view": view})
+        log.debug(f"Total {len(self.routes)} routes registered")
 
     def get_view(self, path):
         """
@@ -139,7 +140,28 @@ class Router:
         :rtype: view object, relative path
         """
 
+        # Normalize empty or None paths to root path for FUSE compatibility
+        # This MUST happen before route matching
+        original_path = path
+
+        # Handle various forms of empty/invalid paths from FUSE
+        if (
+            not path
+            or path == ""
+            or path is None
+            or path.strip() == ""  # whitespace-only paths
+            or not path.isprintable()  # non-printable characters like \x07
+            or len(path) == 1
+            and ord(path) < 32
+        ):  # single control characters
+            log.debug(f"Router: normalizing invalid path {repr(path)} to '/'")
+            path = "/"
+
+        log.debug(f"Router get_view: original='{original_path}' normalized='{path}'")
+
+        log.debug(f"Router: trying to match '{path}' against {len(self.routes)} routes")
         for route in self.routes:
+            log.debug(f"Router: testing '{path}' against '{route['regex']}'")
             result = re.search(route["regex"], path)
             if result is None:
                 continue
@@ -186,7 +208,13 @@ class Router:
 
             return view, relative_path
 
-        raise ValueError(f"Found no view for '{path}'")
+        log.debug(
+            f"Router: No route matched for path '{path}' (original: '{original_path}')"
+        )
+        log.debug(
+            f"Router: Available routes: {[route['regex'] for route in self.routes]}"
+        )
+        raise ValueError(f"Found no view for '{path}' (original: '{original_path}')")
 
     def __call__(self, operation, *args):
         """
@@ -209,6 +237,12 @@ class Router:
             view = self
         else:
             path = args[0]
+            # Normalize empty paths to root - this will be done again in get_view but log here for debugging
+            if not path or path == "" or path is None:
+                log.debug(
+                    f"Router: __call__ received empty path for operation {operation}"
+                )
+            log.debug(f"Router: Operation {operation} with original path: '{path}'")
             view, relative_path = self.get_view(path)
             args = (relative_path,) + args[1:]
 
