@@ -49,11 +49,10 @@ def _detect_fuse_version():
             ("mfusepy", False),  # Try mfusepy as FUSE2 fallback
         ]
     else:
-        # On Linux, temporarily prefer FUSE2 (fusepy) due to FUSE3 compatibility issues
-        # TODO: Fix FUSE3 (mfusepy) read/write operations and restore FUSE3 preference
+        # On Linux, prefer FUSE2 (fusepy) for stability - FUSE3 has CurrentView readdir issues
         fuse_libraries.append(("fuse", False))
-
-        # Add FUSE3 as fallback for now
+        
+        # Add FUSE3 as advanced option (has known issues with CurrentView readdir)
         fuse3_lib = find_library("fuse3")
         if fuse3_lib:
             fuse_libraries.append(("mfusepy", True))
@@ -62,6 +61,20 @@ def _detect_fuse_version():
     last_error = None
     for module_name, is_fuse3_flag in fuse_libraries:
         try:
+            # For mfusepy, set environment variable before importing to ensure correct library
+            if module_name == "mfusepy":
+                import os
+                if is_fuse3_flag:
+                    # Force FUSE3 library
+                    fuse3_lib = find_library("fuse3")
+                    if fuse3_lib:
+                        os.environ["FUSE_LIBRARY_PATH"] = fuse3_lib
+                elif system == "Darwin":
+                    # For macOS, ensure it uses FUSE2 library
+                    fuse2_lib = find_library("fuse")
+                    if fuse2_lib:
+                        os.environ["FUSE_LIBRARY_PATH"] = fuse2_lib
+            
             module = __import__(module_name)
 
             # Test that the module has essential FUSE classes
@@ -70,13 +83,6 @@ def _detect_fuse_version():
 
             _fuse_module = module
             _is_fuse3 = is_fuse3_flag
-
-            # For mfusepy on macOS, ensure it uses FUSE2 library
-            if system == "Darwin" and module_name == "mfusepy" and not is_fuse3_flag:
-                fuse2_lib = find_library("fuse")
-                if fuse2_lib and hasattr(module, "_libfuse_path"):
-                    # Set the library path before it gets loaded
-                    module._libfuse_path = fuse2_lib
 
             return module
         except (ImportError, OSError) as e:
@@ -101,8 +107,16 @@ def get_fuse_module():
 
 def is_fuse3():
     """Return True if using FUSE3, False if using FUSE2."""
-    _detect_fuse_version()  # Ensure detection has run
-    return _is_fuse3
+    module = get_fuse_module()
+    
+    # Check if the loaded module is actually using FUSE3
+    if hasattr(module, "_libfuse_path"):
+        # For mfusepy, check which library it's using
+        library_path = getattr(module, "_libfuse_path", "")
+        return "fuse3" in str(library_path) or "libfuse3" in str(library_path)
+    else:
+        # For fusepy, it's always FUSE2
+        return False
 
 
 def get_fuse_version():

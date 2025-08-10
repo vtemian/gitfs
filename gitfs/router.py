@@ -96,6 +96,11 @@ class Router:
         self.repo.commits.update()
 
         self.workers = []
+        
+        # For mfusepy 3.0+, pre-create FUSE operation methods to avoid
+        # "Method wrapper for FUSE callback is missing" errors
+        if is_fuse3():
+            self._pre_create_fuse3_methods()
 
     def init(self, path):
         for worker in self.workers:
@@ -266,6 +271,19 @@ class Router:
 
         operation_method.__name__ = operation_name
         return operation_method
+    
+    def _pre_create_fuse3_methods(self):
+        """Pre-create FUSE3 operation methods for mfusepy 3.0+ compatibility"""
+        fuse3_operations = {
+            "copy_file_range",
+            "lseek", 
+            "init_with_config",
+        }
+        
+        for operation_name in fuse3_operations:
+            if not hasattr(self, operation_name):
+                method = self._create_operation_method(operation_name)
+                setattr(self, operation_name, method)
 
     def __getattr__(self, attr_name):
         """
