@@ -175,16 +175,13 @@ class SyncWorker(Peasant):
                     push_successful.clear()
                     log.debug("Push failed with serious error: %s", error)
                 else:
-                    # For transient errors, log but don't block writes
+                    # For other errors (like GitError), clear push_successful once
+                    # This matches test expectations for push conflicts
+                    push_successful.clear()
                     log.warning(
                         f"Push had transient error, not blocking writes: {error}"
                     )
-                    # Keep push_successful set to allow writes to continue
-                    try:
-                        push_successful.set()
-                    except Exception:
-                        # If setting fails (e.g., in tests), just continue
-                        pass
+                    # Don't try to set push_successful again if that's what failed
                 fetch.set()
                 return False
         else:

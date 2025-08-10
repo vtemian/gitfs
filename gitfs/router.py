@@ -302,6 +302,10 @@ class Router:
 
         supported_operations = fuse_operations - excluded_operations
 
+        # For excluded operations, return False to indicate they're not supported
+        if attr_name in excluded_operations:
+            return False
+
         if attr_name not in supported_operations:
             raise AttributeError(
                 f"'{self.__class__.__name__}' object has no attribute '{attr_name}'"

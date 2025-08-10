@@ -1,0 +1,34 @@
+#!/bin/bash
+# GitFS cleanup script - unmount existing instances and kill processes
+
+set -e
+
+echo "Cleaning up GitFS instances..."
+
+# Kill any running gitfs processes
+echo "Killing GitFS processes..."
+sudo pkill -f gitfs || true
+sudo pkill -f "python.*gitfs" || true
+sleep 2
+
+# Find and unmount any gitfs filesystems in /tmp/gitfs-tests/
+echo "Unmounting GitFS filesystems..."
+if [ -d "/tmp/gitfs-tests" ]; then
+    # Find all mount points
+    for mnt_dir in /tmp/gitfs-tests/*_mnt; do
+        if [ -d "$mnt_dir" ]; then
+            echo "Unmounting $mnt_dir..."
+            sudo umount -f "$mnt_dir" 2>/dev/null || true
+            sudo umount -l "$mnt_dir" 2>/dev/null || true
+        fi
+    done
+    
+    # Wait a moment for unmounts to complete
+    sleep 1
+    
+    # Remove test directories
+    echo "Removing test directories..."
+    sudo rm -rf /tmp/gitfs-tests || true
+fi
+
+echo "GitFS cleanup complete."

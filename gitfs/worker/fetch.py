@@ -62,10 +62,9 @@ class FetchWorker(Peasant):
             except Exception as e:
                 # Handle different types of errors appropriately
                 if isinstance(e, ValueError):
-                    # For ValueError, always clear and re-raise (for tests)
+                    # For ValueError, clear fetch_successful and continue
                     fetch_successful.clear()
                     log.exception("Fetch failed with ValueError")
-                    raise  # Re-raise ValueError for tests
                 elif "Repository not found" in str(e) or "Network unreachable" in str(
                     e
                 ):

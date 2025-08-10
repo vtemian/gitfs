@@ -86,7 +86,7 @@ class TestMount:
             SyncWorker=mocked_merger,
             FetchWorker=mocked_fetcher,
             get_credentials=MagicMock(return_value="cred"),
-        ), patch("gitfs.mounter.mfusepy.FUSE", mocked_fuse):
+        ), patch("gitfs.fuse_compat.FUSE", mocked_fuse):
 
             assert_result = (mocked_merge_worker, mocked_fetch_worker, mocked_router)
 
@@ -150,6 +150,10 @@ class TestMount:
         # Configure mocked_args to simulate non-root user with allow_other enabled
         mocked_args.allow_root = False
         mocked_args.allow_other = True
+        mocked_args.foreground = True
+        mocked_args.remote_url = "test_url"
+        mocked_args.mount_point = "test_mount"
+        mocked_args.max_open_files = -1
 
         mocked_merge = MagicMock()
         mocked_fetch = MagicMock()
@@ -165,7 +169,11 @@ class TestMount:
             parse_args=mocked_parse_args,
             prepare_components=mocked_prepare,
             resource=MagicMock(),
-        ), patch("gitfs.mounter.mfusepy.FUSE", mocked_fuse), patch("gitfs.mounter.os.geteuid", return_value=1000):
+            is_fuse3=MagicMock(return_value=False),  # Simulate FUSE2 to avoid wrapper code
+            get_fuse_version=MagicMock(return_value="2.9.0"),
+            get_fuse_module=MagicMock(),
+            FUSE=mocked_fuse,  # Patch FUSE at the mounter module level
+        ), patch("gitfs.mounter.os.geteuid", return_value=1000):
             start_fuse()
 
             mocked_argp.ArgumentParser.assert_called_once_with(prog="GitFS")
@@ -178,6 +186,7 @@ class TestMount:
                 "foreground": mocked_args.foreground,
                 "fsname": mocked_args.remote_url,
                 "subtype": "gitfs",
+                "rw": True,  # FUSE3 compatibility flag
                 "allow_other": True,  # Should be True for non-root user
             }
 
