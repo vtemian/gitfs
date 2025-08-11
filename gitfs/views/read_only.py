@@ -33,7 +33,7 @@ class ReadOnlyView(View):
 
         return 0
 
-    def create(self, path, fh):
+    def create(self, path, mode, fi=None):
         raise FuseOSError(EROFS)
 
     def write(self, path, fh):
