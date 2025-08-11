@@ -7,7 +7,7 @@ RUN apt-get update && \
     add-apt-repository ppa:deadsnakes/ppa && \
     add-apt-repository ppa:presslabs/gitfs && \
     apt-get update && \
-    apt-get install -qy python${PYTHON} python${PYTHON}-dev python${PYTHON}-venv python3-pip libfuse-dev fuse git libffi-dev libgit2-dev
+    apt-get install -qy python${PYTHON} python${PYTHON}-dev python${PYTHON}-venv python3-pip libfuse3-dev fuse3 git libffi-dev libgit2-dev
 
 COPY test_requirements.txt requirements.txt /
 RUN pip3 install -r /test_requirements.txt

@@ -34,8 +34,8 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q \
     python3.11-distutils \
     libffi-dev \
     libgit2-dev \
-    libfuse-dev \
-    fuse \
+    libfuse3-dev \
+    fuse3 \
     pkg-config
 
 echo "Configuring FUSE..."

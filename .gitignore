@@ -24,3 +24,4 @@ build/*
 
 venv/
 vagrantenv/
+coverage.xml
