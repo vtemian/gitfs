@@ -15,7 +15,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from gitfs.router import Router
 from gitfs.views import CurrentView
@@ -249,5 +249,5 @@ class TestRouter:
 
     def test_getattr_special_method(self):
         router, mocks = self.get_new_router()
-        assert router.bmap is False
-        assert router.read is not False
+        assert router.bmap is None
+        assert router.read is not None

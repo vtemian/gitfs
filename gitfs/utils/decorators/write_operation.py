@@ -16,7 +16,7 @@
 from errno import EROFS
 from functools import wraps
 
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from gitfs.events import fetch_successful, push_successful, sync_done, syncing, writers
 from gitfs.log import log

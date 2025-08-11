@@ -17,7 +17,7 @@ import errno
 import os
 import re
 
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from gitfs.events import writers
 from gitfs.log import log

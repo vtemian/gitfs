@@ -15,7 +15,7 @@
 
 from abc import ABCMeta
 
-from fuse import LoggingMixIn, Operations
+from mfusepy import LoggingMixIn, Operations
 
 
 class View(LoggingMixIn, Operations, metaclass=ABCMeta):

@@ -17,7 +17,7 @@ import fcntl
 import os
 from errno import EACCES
 
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from .view import View
 

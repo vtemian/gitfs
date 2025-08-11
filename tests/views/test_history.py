@@ -17,7 +17,7 @@ from stat import S_IFDIR
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from gitfs.views.history import HistoryView
 

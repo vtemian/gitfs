@@ -16,7 +16,7 @@
 import os
 from errno import ENOENT
 
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 from pygit2 import (
     GIT_FILEMODE_BLOB,
     GIT_FILEMODE_BLOB_EXECUTABLE,

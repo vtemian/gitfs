@@ -22,7 +22,7 @@ from errno import ENOSYS
 from grp import getgrnam
 from pwd import getpwnam
 
-from fuse import FUSE, FuseOSError
+from mfusepy import FUSE, FuseOSError
 
 from gitfs.cache import CachedIgnore, lru_cache
 from gitfs.events import fetch, idle, shutting_down
@@ -210,14 +210,75 @@ class Router:
 
         raise ValueError(f"Found no view for '{path}'")
 
-    def __getattr__(self, attr_name):
+    def init_with_config(self, conn_info=None, config=None):
         """
-        It will only be called by the `__init__` method from `fuse.FUSE` to
-        establish which operations will be allowed after mounting the
-        filesystem.
+        Initialize filesystem with configuration.
+        Called by mfusepy during mount process.
+        """
+        # Delegate to the regular init method
+        return self.init(None)
+
+    def __getattr__(self, operation):
+        """
+        Handle FUSE operations by either returning None for unsupported operations
+        or delegating to the __call__ method for supported operations.
+
+        This method is compatible with mfusepy which expects:
+        - None for unsupported operations (so they can be ignored)
+        - Callable methods for supported operations
         """
 
-        methods = inspect.getmembers(FUSE, predicate=callable)
-        fuse_allowed_methods = {elem[0] for elem in methods}
+        # Operations that are not supported should return None
+        # so that mfusepy can ignore them completely
+        unsupported_operations = {
+            "bmap",
+            "ioctl",
+            "poll",
+            "flock",
+            "fallocate",
+            "lock",
+            "read_buf",
+        }
 
-        return attr_name in fuse_allowed_methods - {"bmap", "lock"}
+        if operation in unsupported_operations:
+            return None
+
+        # For supported FUSE operations, return a callable that delegates to __call__
+        supported_operations = {
+            "getattr",
+            "readdir",
+            "read",
+            "write",
+            "create",
+            "mkdir",
+            "rmdir",
+            "unlink",
+            "rename",
+            "chmod",
+            "chown",
+            "truncate",
+            "open",
+            "release",
+            "fsync",
+            "symlink",
+            "readlink",
+            "link",
+            "mknod",
+            "statfs",
+            "flush",
+            "opendir",
+            "releasedir",
+            "fsyncdir",
+            "access",
+            "getxattr",
+            "listxattr",
+            "removexattr",
+            "setxattr",
+            "utimens",
+        }
+
+        if operation in supported_operations:
+            return lambda *args: self(operation, *args)
+
+        # For any other operation, return None (unsupported)
+        return None

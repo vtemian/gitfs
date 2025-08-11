@@ -115,7 +115,7 @@ The test system uses:
 
 ## Key Dependencies
 
-- `fusepy`: FUSE bindings for Python
+- `mfusepy`: FUSE bindings for Python (FUSE3 compatible)
 - `pygit2>=1.18.0`: Git operations via libgit2 v1.8.1
 - `atomiclong`: Thread-safe counters
 - `sentry-sdk`: Error reporting (Sentry)

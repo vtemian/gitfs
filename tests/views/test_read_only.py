@@ -16,7 +16,7 @@
 import os
 
 import pytest
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from gitfs.views.read_only import ReadOnlyView
 

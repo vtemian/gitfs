@@ -16,7 +16,7 @@
 import os
 from errno import EROFS
 
-from fuse import ENOTSUP, FuseOSError
+from mfusepy import ENOTSUP, FuseOSError
 
 from .view import View
 
@@ -33,7 +33,7 @@ class ReadOnlyView(View):
 
         return 0
 
-    def create(self, path, fh):
+    def create(self, path, mode, fi=None):
         raise FuseOSError(EROFS)
 
     def write(self, path, fh):

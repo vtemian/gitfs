@@ -17,7 +17,7 @@ import argparse
 import resource
 import sys
 
-from fuse import FUSE
+from mfusepy import FUSE
 from pygit2 import Keypair, RemoteCallbacks, UserPass
 
 from gitfs import __version__

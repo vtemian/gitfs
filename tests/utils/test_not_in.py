@@ -16,7 +16,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from gitfs.cache import CachedIgnore
 from gitfs.utils.decorators.not_in import not_in

@@ -146,12 +146,6 @@ toml = [
 ]
 
 [[package]]
-name = "fusepy"
-version = "3.0.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/04/0b/4506cb2e831cea4b0214d3625430e921faaa05a7fb520458c75a2dbd2152/fusepy-3.0.1.tar.gz", hash = "sha256:72ff783ec2f43de3ab394e3f7457605bf04c8cf288a2f4068b4cde141d4ee6bd", size = 11519, upload-time = "2018-09-17T00:14:52.666Z" }
-
-[[package]]
 name = "ghp-import"
 version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -169,7 +163,7 @@ source = { editable = "." }
 dependencies = [
     { name = "atomiclong" },
     { name = "cffi" },
-    { name = "fusepy" },
+    { name = "mfusepy" },
     { name = "pycparser" },
     { name = "pygit2" },
     { name = "sentry-sdk" },
@@ -197,7 +191,7 @@ test = [
 requires-dist = [
     { name = "atomiclong", specifier = "==0.1.1" },
     { name = "cffi", specifier = ">=1.15.1" },
-    { name = "fusepy", specifier = "==3.0.1" },
+    { name = "mfusepy", specifier = "==3.0.0" },
     { name = "mkdocs", marker = "extra == 'docs'" },
     { name = "mock", marker = "extra == 'dev'", specifier = "==5.1.0" },
     { name = "mock", marker = "extra == 'test'", specifier = "==5.1.0" },
@@ -299,6 +293,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/3a/41/580bb4006e3ed0361b8151a01d324fb03f420815446c7def45d02f74c270/mergedeep-1.3.4.tar.gz", hash = "sha256:0096d52e9dad9939c3d975a774666af186eda617e6ca84df4c94dec30004f2a8", size = 4661, upload-time = "2021-02-05T18:55:30.623Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2c/19/04f9b178c2d8a15b076c8b5140708fa6ffc5601fb6f1e975537072df5b2a/mergedeep-1.3.4-py3-none-any.whl", hash = "sha256:70775750742b25c0d8f36c55aed03d24c3384d17c951b3175d898bd778ef0307", size = 6354, upload-time = "2021-02-05T18:55:29.583Z" },
+]
+
+[[package]]
+name = "mfusepy"
+version = "3.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/94/c9d5dcba4a6a2b32ba23e22fd13ca08e6f5408420b2dfe42984af22277b6/mfusepy-3.0.0.tar.gz", hash = "sha256:eddade33e427bac9c455464cd0a7d12d63c033255ec6b1e0d6ada143a945c6f2", size = 26823, upload-time = "2025-08-01T14:04:30.115Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/97/a7/42c1e998ae2b505fa89f2e92683ac136b21186bf47ef8dea06ab3d646c8b/mfusepy-3.0.0-py3-none-any.whl", hash = "sha256:1f8d487ac2c1138b1642955ef92e253685943c97e6f3f5b0e910ab8e04c6312d", size = 24710, upload-time = "2025-08-01T14:04:28.872Z" },
 ]
 
 [[package]]
