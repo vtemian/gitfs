@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 from unittest.mock import MagicMock, call, patch
 
 from gitfs.mounter import get_credentials, parse_args, prepare_components, start_fuse
@@ -177,9 +176,6 @@ class TestMount:
                 "subtype": "gitfs",
                 "fsname": mocked_args.remote_url,
             }
-
-            if sys.platform != "darwin":
-                excepted_call["nonempty"] = True
 
             mocked_fuse.assert_called_once_with(
                 mocked_router, mocked_args.mount_point, **excepted_call
