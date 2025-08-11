@@ -17,7 +17,7 @@ import errno
 import inspect
 from functools import wraps
 
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 
 class not_in:

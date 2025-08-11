@@ -16,7 +16,7 @@
 import os
 from errno import EROFS
 
-from fuse import ENOTSUP, FuseOSError
+from mfusepy import ENOTSUP, FuseOSError
 
 from .view import View
 

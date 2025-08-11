@@ -18,7 +18,7 @@ import time
 from errno import ENOENT
 from stat import S_IFDIR
 
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from gitfs.log import log
 

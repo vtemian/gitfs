@@ -15,7 +15,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fuse import FuseOSError
+from mfusepy import FuseOSError
 
 from gitfs.router import Router
 from gitfs.views import CurrentView

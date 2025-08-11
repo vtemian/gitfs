@@ -22,7 +22,7 @@ from errno import ENOSYS
 from grp import getgrnam
 from pwd import getpwnam
 
-from fuse import FUSE, FuseOSError
+from mfusepy import FUSE, FuseOSError
 
 from gitfs.cache import CachedIgnore, lru_cache
 from gitfs.events import fetch, idle, shutting_down
@@ -210,14 +210,10 @@ class Router:
 
         raise ValueError(f"Found no view for '{path}'")
 
-    def __getattr__(self, attr_name):
+    def init_with_config(self, conn_info=None, config=None):
         """
-        It will only be called by the `__init__` method from `fuse.FUSE` to
-        establish which operations will be allowed after mounting the
-        filesystem.
+        Initialize filesystem with configuration.
+        Called by mfusepy during mount process.
         """
-
-        methods = inspect.getmembers(FUSE, predicate=callable)
-        fuse_allowed_methods = {elem[0] for elem in methods}
-
-        return attr_name in fuse_allowed_methods - {"bmap", "lock"}
+        # Delegate to the regular init method
+        return self.init(None)
