@@ -304,14 +304,11 @@ class Router:
             "fgetattr",
             "flush",
             "fsync",
-            "fsyncdir",
             "ftruncate",
             "getattr",
-            "getxattr",
             "init",
             "ioctl",
             "link",
-            "listxattr",
             "mkdir",
             "mknod",
             "open",
@@ -322,10 +319,8 @@ class Router:
             "readlink",
             "release",
             "releasedir",
-            "removexattr",
             "rename",
             "rmdir",
-            "setxattr",
             "statfs",
             "symlink",
             "truncate",
@@ -347,9 +342,16 @@ class Router:
         excluded_operations = {
             "bmap",
             "lock",
-            "flock",
+            "flock", 
             "read_buf",
             "write_buf",
+            # Extended attributes cause FUSE library crashes with invalid parameters
+            "setxattr",
+            "getxattr",
+            "listxattr",
+            "removexattr",
+            # Directory sync operations cause NULL pointer access
+            "fsyncdir",
         }
 
         supported_operations = fuse_operations - excluded_operations
