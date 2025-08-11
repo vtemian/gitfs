@@ -50,3 +50,14 @@ class IndexView(ReadOnlyView):
 
     def readdir(self, path, fh):
         yield from [".", "..", self.current_path, self.history_path]
+    
+    def setxattr(self, path, name, value, options, position=0):
+        # FUSE operation for setting extended attributes
+        # Not supported for IndexView, return ENOTSUP
+        from errno import ENOTSUP
+        raise FuseOSError(ENOTSUP)
+    
+    def fsyncdir(self, path, datasync, fh):
+        # FUSE operation for syncing directory
+        # No-op for read-only IndexView
+        return 0

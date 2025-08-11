@@ -192,3 +192,84 @@ class PassthroughView(View):
             return os.lseek(fh, offset, whence)
         except OSError as e:
             raise FuseOSError(e.errno)
+    
+    def setxattr(self, path, name, value, options, position=0):
+        """Set extended attributes on a file"""
+        try:
+            full_path = self.repo._full_path(path)
+            # Check if platform supports extended attributes
+            if hasattr(os, 'setxattr'):
+                # Linux/Unix systems
+                os.setxattr(full_path, name, value, follow_symlinks=True)
+            else:
+                # Platform doesn't support extended attributes
+                from errno import ENOTSUP
+                raise FuseOSError(ENOTSUP)
+        except OSError as e:
+            raise FuseOSError(e.errno)
+    
+    def getxattr(self, path, name, position=0):
+        """Get extended attributes from a file"""
+        try:
+            full_path = self.repo._full_path(path)
+            if hasattr(os, 'getxattr'):
+                # Linux/Unix systems
+                return os.getxattr(full_path, name, follow_symlinks=True)
+            else:
+                # Platform doesn't support extended attributes
+                from errno import ENOTSUP
+                raise FuseOSError(ENOTSUP)
+        except OSError as e:
+            raise FuseOSError(e.errno)
+    
+    def listxattr(self, path):
+        """List extended attributes on a file"""
+        try:
+            full_path = self.repo._full_path(path)
+            if hasattr(os, 'listxattr'):
+                # Linux/Unix systems
+                return os.listxattr(full_path, follow_symlinks=True)
+            else:
+                # Return empty list if not supported
+                return []
+        except OSError as e:
+            raise FuseOSError(e.errno)
+    
+    def removexattr(self, path, name):
+        """Remove extended attributes from a file"""
+        try:
+            full_path = self.repo._full_path(path)
+            if hasattr(os, 'removexattr'):
+                # Linux/Unix systems
+                os.removexattr(full_path, name, follow_symlinks=True)
+            else:
+                # Platform doesn't support extended attributes
+                from errno import ENOTSUP
+                raise FuseOSError(ENOTSUP)
+        except OSError as e:
+            raise FuseOSError(e.errno)
+    
+    def opendir(self, path):
+        """Open a directory for reading"""
+        # Just verify the directory exists and is accessible
+        full_path = self.repo._full_path(path)
+        if not os.path.isdir(full_path):
+            from errno import ENOTDIR
+            raise FuseOSError(ENOTDIR)
+        if not os.access(full_path, os.R_OK):
+            from errno import EACCES
+            raise FuseOSError(EACCES)
+        # Return 0 to indicate success
+        return 0
+    
+    def releasedir(self, path, fh):
+        """Release an open directory"""
+        # No-op - directories don't need explicit closing in Python
+        return 0
+    
+    def fsyncdir(self, path, datasync, fh):
+        """Synchronize directory contents"""
+        # FUSE may pass fh=0 or None for directories
+        # Since directories don't have file handles in the same way files do,
+        # we just return success (no-op)
+        return 0

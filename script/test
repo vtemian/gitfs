@@ -18,7 +18,7 @@ echo "REPO_DIR: $REPO_DIR"
 # Start gitfs and capture both stdout and stderr
 uv run gitfs "$BARE_REPO" "$MNT_DIR" -o \
 "repo_path=$REPO_DIR,fetch_timeout=.1,merge_timeout=.1,\
-allow_other=true,foreground=true,log=log.txt,debug=true,idle_fetch_timeout=.1" > gitfs_output.log 2>&1 &
+allow_other=true,foreground=true,log=log.txt,debug=true,idle_fetch_timeout=.1" 
 
 GITFS_PID=$!
 echo $GITFS_PID > "$GITFS_PID"

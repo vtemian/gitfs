@@ -72,3 +72,19 @@ class ReadOnlyView(View):
 
     def chmod(self, path, mode):
         raise FuseOSError(EROFS)
+    
+    def setxattr(self, path, name, value, options, position=0):
+        # Extended attributes not supported in read-only views
+        raise FuseOSError(ENOTSUP)
+    
+    def listxattr(self, path):
+        # Return empty list - no extended attributes in read-only views
+        return []
+    
+    def removexattr(self, path, name):
+        # Extended attributes not supported in read-only views
+        raise FuseOSError(ENOTSUP)
+    
+    def fsyncdir(self, path, datasync, fh):
+        # No-op for read-only views - nothing to sync
+        return 0
