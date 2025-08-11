@@ -31,7 +31,22 @@ gitfs is useful in places where you want to keep track of all your files, but at
 
 ## Installing
 
-### Ubuntu 22.04+ / Debian 12+
+### Ubuntu (via PPA) - Recommended
+
+The easiest way to install gitfs on Ubuntu is through the official PPA:
+
+```bash
+# Add the gitfs PPA
+sudo add-apt-repository ppa:vladtemian/gitfs
+sudo apt-get update
+
+# Install gitfs
+sudo apt-get install gitfs
+```
+
+This method automatically handles all dependencies and keeps gitfs updated.
+
+### Ubuntu 22.04+ / Debian 12+ (via pip)
 
 ```bash
 # Install system dependencies
@@ -43,7 +58,7 @@ sudo apt-get install -y libfuse3-dev fuse3 libgit2-dev
 pip install gitfs
 ```
 
-### Ubuntu 20.04 / Debian 11
+### Ubuntu 20.04 / Debian 11 (via pip)
 
 ```bash
 # Add Python 3.11 repository
