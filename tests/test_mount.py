@@ -129,7 +129,7 @@ class TestMount:
             asserted_calls = [
                 call("remote_url", help="repo to be cloned"),
                 call("mount_point", help="where the repo should be mount"),
-                call("-v", "--version", action="version", version="%(prog)s 0.5.2"),
+                call("-v", "--version", action="version", version="%(prog)s 1.0.0"),
                 call(
                     "-o",
                     help="other options: repo_path, "
