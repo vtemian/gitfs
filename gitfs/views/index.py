@@ -49,4 +49,4 @@ class IndexView(ReadOnlyView):
         return attrs
 
     def readdir(self, path, fh):
-        return [".", "..", self.current_path, self.history_path]
+        yield from [".", "..", self.current_path, self.history_path]
