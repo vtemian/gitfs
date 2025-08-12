@@ -47,6 +47,7 @@ jobs:
           fuse3 \
           libfuse3-dev \
           git \
+          git-lfs \
           libffi-dev \
           libgit2-dev \
           python3-pip
